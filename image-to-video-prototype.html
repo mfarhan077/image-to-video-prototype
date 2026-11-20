@@ -1,0 +1,1007 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="data:,">
+<title>FrameFlow Studio — Image to Video</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#131314; --bg2:#0b0b0c; --panel:#1e1f20; --panel2:#28292a; --panel3:#333436;
+  --ink:#f1f1ee; --muted:#a9abae; --muted2:#7d7f83; --line:#2e2f31; --line2:#3f4043;
+  --accent:#ff4a1f; --accent2:#ff6b47; --amber:#ffb703; --green:#34d399; --green-bg:#0f241a;
+  --radius:20px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:"Manrope",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+img{max-width:100%;display:block}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.mono{font-family:"JetBrains Mono",monospace}
+.wrap{max-width:920px;margin:0 auto;padding:0 14px 56px}
+
+/* ===== Top bar (minimal) ===== */
+.topbar{position:sticky;top:0;z-index:50;background:rgba(19,19,20,.94);backdrop-filter:blur(14px);display:flex;align-items:center;gap:12px;padding:10px 2px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;font-family:"Sora";font-weight:800;font-size:17px}
+.logo-mark{width:34px;height:34px;border-radius:9px;background:#fff;color:#111;display:grid;place-items:center;font-size:14px}
+.logo em{font-style:normal;color:var(--accent)}
+.top-right{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chip{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;background:var(--panel2);border:1px solid var(--line2);padding:7px 11px;border-radius:999px}
+.chip b{color:var(--amber)}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--accent);display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff}
+
+/* ===== Preview stage ===== */
+.stage-panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-top:16px}
+.viewport-wrap{display:flex;justify-content:center}
+.viewport{position:relative;width:100%;max-width:860px;aspect-ratio:16/9;background:#000;border-radius:16px;overflow:hidden;border:1px solid var(--line2);transition:max-width .25s,aspect-ratio .25s}
+.viewport.ratio-9-16{aspect-ratio:9/16;max-width:330px}
+.viewport.ratio-1-1{aspect-ratio:1/1;max-width:520px}
+.viewport.ratio-4-5{aspect-ratio:4/5;max-width:410px}
+.viewport.ratio-3-4{aspect-ratio:3/4;max-width:440px}
+.viewport.ratio-4-3{aspect-ratio:4/3;max-width:640px}
+.viewport.ratio-21-9{aspect-ratio:21/9;max-width:880px}
+.viewport.drag-over{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,74,31,.35)}
+.viewport .bg-blur{position:absolute;inset:-24px;width:calc(100% + 48px);height:calc(100% + 48px);max-width:none;object-fit:cover;filter:blur(26px) brightness(.5);pointer-events:none}
+.scene-wrap{position:absolute;inset:0;will-change:transform}
+.scene-wrap.talking{animation:talkbob 2.6s ease-in-out infinite}
+@keyframes talkbob{0%,100%{transform:translateY(0) rotate(0deg)}25%{transform:translateY(-.45%) rotate(.18deg)}55%{transform:translateY(.3%) rotate(-.15deg)}80%{transform:translateY(-.2%) rotate(.1deg)}}
+.viewport img.scene{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;will-change:transform;transform-origin:center}
+.viewport .scan{position:absolute;inset:0;background:linear-gradient(180deg,transparent 0%,rgba(255,74,31,.25) 50%,transparent 100%);height:120px;animation:scan 1.1s linear infinite;display:none;pointer-events:none;z-index:3}
+@keyframes scan{from{transform:translateY(-140px)}to{transform:translateY(640px)}}
+.generating .scan{display:block}
+.badge{position:absolute;font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;background:rgba(0,0,0,.72);color:#fff;padding:6px 9px;border-radius:999px;z-index:4}
+.badge.tl{top:12px;left:12px}.badge.tr{top:12px;right:12px;color:var(--amber)}.badge.bl{bottom:12px;left:12px}.badge.br{bottom:12px;right:12px}
+.rec-dot{display:inline-block;width:8px;height:8px;background:#ff2d2d;border-radius:50%;margin-right:6px;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.2}}
+.empty-stage{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;z-index:2;background:radial-gradient(ellipse at 50% 38%,#26221f 0%,#101011 68%)}
+.empty-stage.hide{display:none}
+.viewport:has(.empty-stage:not(.hide)) .badge{display:none}
+.empty-stage .big-ic{width:64px;height:64px;margin:0 auto 12px;border-radius:50%;background:var(--panel2);border:1.5px dashed var(--line2);display:grid;place-items:center;font-size:26px}
+.empty-stage strong{font-family:"Sora";font-size:19px;display:block}
+.empty-stage p{color:var(--muted);font-size:13.5px;margin:6px auto 14px;max-width:420px;line-height:1.6}
+.empty-stage button{background:#fff;color:#111;border:none;border-radius:999px;padding:11px 20px;font-weight:800;font-size:14px}
+.drop-overlay{position:absolute;inset:0;background:rgba(10,10,10,.85);display:none;place-items:center;z-index:6;text-align:center;padding:20px}
+.viewport.drag-over .drop-overlay{display:grid}
+.drop-overlay strong{font-family:"Sora";font-size:20px;display:block}
+.drop-overlay span{color:var(--muted);font-size:13px}
+.lip-box{position:absolute;left:12px;top:52px;z-index:5;display:none;align-items:center;gap:8px;background:rgba(0,0,0,.72);border:1px solid rgba(52,211,153,.5);padding:7px 11px;border-radius:999px}
+.lip-box.show{display:flex}
+.lip-box .lbl{font-family:"JetBrains Mono",monospace;font-size:10px;font-weight:700;color:var(--green);letter-spacing:.06em}
+.lip-bars{display:flex;gap:2.5px;align-items:center;height:16px}
+.lip-bars i{width:3.5px;background:var(--green);border-radius:2px;animation:lip .32s ease-in-out infinite}
+.lip-bars i:nth-child(1){animation-delay:0s}.lip-bars i:nth-child(2){animation-delay:.07s}.lip-bars i:nth-child(3){animation-delay:.14s}.lip-bars i:nth-child(4){animation-delay:.05s}.lip-bars i:nth-child(5){animation-delay:.18s}.lip-bars i:nth-child(6){animation-delay:.1s}.lip-bars i:nth-child(7){animation-delay:.22s}
+@keyframes lip{0%,100%{height:4px}50%{height:15px}}
+.gesture-tag{position:absolute;right:12px;top:52px;z-index:5;display:none;background:rgba(0,0,0,.72);border:1px solid rgba(255,183,3,.55);color:#ffd97a;font-size:11px;font-weight:800;padding:7px 11px;border-radius:999px}
+.gesture-tag.show{display:block}
+.caption-box{position:absolute;left:50%;transform:translateX(-50%);bottom:44px;z-index:4;width:max-content;max-width:88%;background:rgba(0,0,0,.8);color:#fff;border-radius:12px;padding:9px 15px;font-size:15.5px;font-weight:700;text-align:center;line-height:1.5;display:none}
+.caption-box.show{display:block}
+.caption-box .who{color:var(--amber);font-size:10.5px;letter-spacing:.09em;display:block;font-family:"JetBrains Mono",monospace;margin-bottom:2px}
+.caption-box .cur{color:var(--amber);background:rgba(255,183,3,.16);border-radius:4px;padding:0 3px}
+.gen-overlay{position:absolute;inset:0;background:rgba(0,0,0,.68);display:none;place-items:center;text-align:center;padding:20px;z-index:7}
+.generating .gen-overlay{display:grid}
+.gen-overlay .pct{font-family:"Sora";font-size:50px;font-weight:800;line-height:1}
+.gen-overlay p{color:#ddd;margin:6px 0}
+.progress{height:7px;background:var(--panel3);border-radius:999px;overflow:hidden;margin-top:12px}
+.progress i{display:block;height:100%;background:var(--accent);width:0%;transition:width .25s}
+.stage-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-top:12px}
+.fit-badge{display:inline-flex;align-items:center;gap:6px;background:var(--green-bg);border:1px solid #1f4a32;color:#8fe3b0;font-weight:800;font-size:12.5px;padding:8px 13px;border-radius:999px}
+.stage-meta .mono{font-size:11.5px;color:var(--muted)}
+.player{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+.pbtn{background:#fff;color:#111;border:none;border-radius:999px;padding:10px 17px;font-weight:800;font-size:14px}
+.pbtn.secondary{background:var(--panel3);color:var(--ink);border:1px solid var(--line2)}
+.pbtn:disabled{opacity:.45;cursor:not-allowed}
+.timeline{flex:1;min-width:180px}
+.timeline-track{height:8px;background:var(--panel3);border-radius:999px;overflow:hidden;cursor:pointer;position:relative}
+.timeline-fill{height:100%;background:var(--amber);width:0%}
+.gesture-track{position:relative;height:16px;margin-top:7px}
+.gesture-track:empty{display:none}
+.gesture-track .gmark{position:absolute;transform:translateX(-50%);font-size:9px;font-weight:800;color:#ffd97a;background:#2b2110;border:1px solid #4a3a10;border-radius:999px;padding:1px 6px;white-space:nowrap}
+.timecode{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;margin-top:3px;gap:8px;flex-wrap:wrap}
+
+/* ===== THE ONE COMPOSER — chat style: image + prompt + generate, ek hi jagah ===== */
+.composer{margin-top:16px;background:#202122;border:1px solid var(--line2);border-radius:26px;padding:18px;box-shadow:0 18px 44px rgba(0,0,0,.4)}
+.composer-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px}
+.composer-head .ic{font-size:22px;line-height:1.25}
+.composer-head strong{font-family:"Sora";font-size:16.5px;display:block;margin-bottom:2px}
+.composer-head p{margin:0;font-size:13px;color:var(--muted);line-height:1.6}
+.composer-head p b{color:#fff}
+.step-label{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+.step-label>span:first-child{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.step-num{display:inline-grid;place-items:center;width:21px;height:21px;border-radius:50%;background:#fff;color:#111;font-size:12px;font-weight:800;letter-spacing:0}
+.step-num.green{background:var(--green);color:#08130c}
+.field-badge{font-size:10px;font-weight:800;letter-spacing:.05em;padding:4px 9px;border-radius:999px;white-space:nowrap;text-transform:none}
+.field-badge.notspoken{background:#2b2110;color:#ffd97a;border:1px solid #4a3a10}
+.field-badge.spoken{background:var(--green);color:#08130c}
+.field-badge.optional{background:var(--panel3);color:var(--muted);border:1px solid var(--line2)}
+.mini-btn{background:var(--panel3);border:1px solid var(--line2);color:var(--ink);border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:800;letter-spacing:0;text-transform:none}
+.mini-btn:hover{border-color:var(--amber);color:var(--amber)}
+.lab-actions{display:flex;gap:6px;flex-wrap:wrap}
+
+/* Step 1: image attachment — bilkul chat ke attachment jaisa */
+.drop{border:2px dashed var(--line2);border-radius:16px;padding:16px 12px;text-align:center;cursor:pointer;background:var(--bg2);transition:.18s}
+.drop:hover,.drop.drag{border-color:var(--accent);background:#241310}
+.drop .up{width:42px;height:42px;margin:0 auto 7px;border-radius:50%;background:#fff;color:#111;display:grid;place-items:center;font-size:18px;font-weight:900}
+.drop strong{display:block;font-size:14.5px}
+.drop span{font-size:12px;color:var(--muted);display:block;line-height:1.5;margin-top:3px}
+.drop .browse{display:inline-block;margin-top:10px;background:var(--accent);color:#fff;font-weight:800;font-size:13px;padding:9px 16px;border-radius:999px}
+.attach{display:none;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--green);border-radius:16px;padding:10px 12px}
+.attach.show{display:flex}
+.attach img{width:64px;height:64px;object-fit:cover;border-radius:10px;flex:0 0 auto}
+.attach .a-meta{min-width:0;flex:1}
+.attach .a-meta strong{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.attach .a-meta span{font-size:12px;color:var(--muted);display:block;line-height:1.55}
+.attach .a-meta .ok{color:var(--green);font-weight:700}
+.attach .a-btns{display:flex;gap:6px;flex-wrap:wrap}
+.small-btn{background:var(--panel3);border:1px solid var(--line2);color:var(--ink);border-radius:999px;padding:8px 13px;font-size:12.5px;font-weight:800;white-space:nowrap}
+.small-btn:hover{border-color:var(--amber)}
+.small-btn.danger:hover{border-color:#ff5252;color:#ff8a8a}
+
+/* Step 2 + 3: prompt / script textareas */
+.composer textarea{width:100%;background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:16px;padding:14px;font-size:15px;line-height:1.6;resize:vertical}
+.composer textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+.composer textarea::placeholder{color:var(--muted2)}
+#promptInput{min-height:132px}
+.field-block{margin-top:18px}
+.char-count{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--muted);margin-top:6px;display:flex;flex-wrap:wrap;gap:4px 14px}
+.char-count b{color:#fff}
+.char-count .free{color:var(--green);font-weight:700}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.chip-btn{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:12.5px;font-weight:700}
+.chip-btn:hover{border-color:var(--amber);color:var(--amber)}
+.script-block{background:var(--green-bg);border:1px solid #1f4a32;border-radius:18px;padding:13px}
+.script-block .step-label{color:#8fe3b0}
+.script-block textarea{background:#0d1a12;border-color:#1f4a32;min-height:104px}
+.script-block textarea:focus{outline-color:var(--green)}
+.voice-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.voice-row>span{font-size:12px;color:#8fe3b0;font-weight:700}
+.voice-btn{background:#0d1a12;color:#d7f5e2;border:1px solid #2a5c40;border-radius:999px;padding:7px 12px;font-size:12.5px;font-weight:700}
+.voice-btn.on{background:var(--green);color:#08130c;border-color:var(--green)}
+.fit-meter{margin-top:10px;background:#0d1a12;border:1px solid #2a5c40;border-radius:12px;padding:10px 12px}
+.fit-meter .fit-row{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:13px;color:#b9d9c4}
+.fit-meter .fit-row b{color:#fff;font-family:"JetBrains Mono",monospace;font-size:12.5px}
+.fit-meter .fit-status{font-weight:800}
+.fit-meter .fit-status.ok{color:var(--green)}
+.fit-meter .fit-status.warn{color:var(--amber)}
+.fit-meter .fit-bar{height:7px;background:#123324;border-radius:999px;overflow:hidden;margin-top:8px}
+.fit-meter .fit-bar i{display:block;height:100%;background:var(--green);width:0%;transition:width .25s}
+.fit-meter .fit-bar i.over{background:var(--amber)}
+.fit-meter .fit-actions{margin-top:9px;display:flex;gap:7px;flex-wrap:wrap}
+.script-note{margin:9px 0 0;font-size:12px;color:#8fe3b0;line-height:1.6}
+
+/* Advanced (band rehta hai — screen saaf rehti hai) */
+details.advanced{margin-top:16px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+details.advanced summary{cursor:pointer;font-weight:800;font-size:13.5px;list-style:none}
+details.advanced summary::-webkit-details-marker{display:none}
+details.advanced summary span{color:var(--muted);font-weight:600;font-size:12.5px}
+.adv-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+.adv-grid label{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+.adv-grid select{width:100%;background:var(--panel3);color:#fff;border:1px solid var(--line2);border-radius:12px;padding:9px 11px;font-size:13.5px;font-weight:700}
+.adv-grid textarea{min-height:58px;font-size:13.5px;border-radius:12px;padding:10px 12px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.range-row{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted)}
+
+/* Composer bottom bar — chat ke send bar jaisa */
+.dock-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+.ctl{display:flex;align-items:center;gap:7px;background:var(--panel2);border:1px solid var(--line2);border-radius:999px;padding:6px 8px 6px 13px}
+.ctl .ctl-label{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.05em}
+.ctl select{background:var(--panel3);color:#fff;border:1px solid var(--line2);border-radius:999px;padding:6px 9px;font-size:12.5px;font-weight:700;max-width:200px}
+.out-pills{display:flex;gap:4px}
+.out-pills button{background:transparent;border:1px solid transparent;color:var(--muted);border-radius:999px;padding:5px 9px;font-weight:800;font-size:12.5px}
+.out-pills button.on{background:#fff;color:#111}
+.dur-pills{display:flex;gap:5px;flex-wrap:wrap}
+.pill{background:var(--panel2);color:var(--ink);border:1px solid var(--line);padding:8px 12px;border-radius:999px;font-weight:800;cursor:pointer;font-size:13px}
+.pill.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.generate{margin-left:auto;background:var(--accent);color:#fff;border:none;border-radius:999px;padding:13px 24px;font-weight:800;font-size:15.5px;display:flex;align-items:center;gap:9px}
+.generate:hover:not(:disabled){background:var(--accent2)}
+.generate:disabled{opacity:.55;cursor:not-allowed}
+.generate .arr{width:26px;height:26px;background:#fff;color:var(--accent);border-radius:50%;display:grid;place-items:center;font-size:14px}
+.spec-line{margin-top:12px;font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--muted);line-height:1.8;overflow-wrap:anywhere}
+.spec-line b{color:#fff}
+.status-line{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--muted);line-height:1.7;margin-top:4px}
+.status-line b{color:var(--green)}
+.export-box{display:none;background:var(--green-bg);border:1px solid #1f4a32;border-radius:16px;padding:14px;margin-top:14px}
+.export-box.show{display:block}
+.export-box h4{margin:0 0 5px;font-size:15px}
+.export-box p{margin:0 0 12px;color:#b9d9c4;font-size:13.5px;line-height:1.6}
+
+/* Library */
+.library{margin-top:16px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+.library-head{display:flex;flex-wrap:wrap;gap:12px;align-items:end;justify-content:space-between}
+.library h2{font-family:"Sora";font-size:clamp(20px,2.6vw,28px);margin:0}
+.library .sub{color:var(--muted);margin:5px 0 0;font-size:14px;max-width:660px}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.stat{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:9px 14px;text-align:center;min-width:84px}
+.stat b{font-family:"Sora";font-size:19px;display:block;line-height:1.1}
+.stat span{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.lib-tools{display:flex;gap:7px;flex-wrap:wrap;margin:15px 0 13px;align-items:center}
+.filter-btn{background:var(--bg2);border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:8px 14px;font-weight:800;font-size:13px}
+.filter-btn.on{background:#fff;color:#111;border-color:#fff}
+.searchbox{background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;color:var(--ink);width:210px;margin-left:auto}
+.searchbox::placeholder{color:var(--muted2)}
+.lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:12px}
+.lib-card{background:var(--bg2);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.lib-card .thumb{position:relative}
+.lib-card .thumb img{width:100%;height:140px;object-fit:cover}
+.lib-card .dur-badge{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.8);color:#fff;font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;padding:4px 8px;border-radius:999px}
+.lib-card .mode-badge{position:absolute;top:8px;left:8px;font-size:10px;font-weight:800;padding:4px 8px;border-radius:999px;background:rgba(0,0,0,.8);color:#fff}
+.lib-card .mode-badge.talk{color:#8fe3b0}
+.lib-body{padding:12px 13px}
+.lib-body strong{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lib-body .prompt-txt{color:var(--muted);font-size:12.5px;line-height:1.5;margin:5px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.lib-body .prompt-txt .k{font-family:"JetBrains Mono",monospace;font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--muted2);display:block}
+.lib-body .prompt-txt.say{color:#b9d9c4}
+.lib-body .prompt-txt.say .k{color:var(--green)}
+.lib-body .meta-line{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--muted2);margin-top:8px;line-height:1.7}
+.lib-body .st{font-weight:700;color:var(--green)}
+.lib-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.lib-actions button{flex:1;border-radius:999px;padding:8px 5px;font-size:11.5px;font-weight:800;border:1px solid var(--line2);background:var(--panel3);color:var(--ink);white-space:nowrap}
+.lib-actions button.primary{background:#fff;color:#111;border-color:#fff}
+.lib-actions button:hover{border-color:var(--amber)}
+.empty{border:1.5px dashed var(--line2);border-radius:16px;padding:30px 18px;color:var(--muted);text-align:center}
+.empty strong{color:var(--ink);display:block;font-size:16px;margin-bottom:4px}
+footer{margin-top:32px;border-top:1px solid var(--line);padding-top:15px;color:var(--muted2);font-size:12.5px;display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between}
+.toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:18px;background:#fff;color:#111;padding:12px 18px;border-radius:999px;font-weight:800;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:80;max-width:92vw;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.editor-overlay{position:fixed;inset:0;background:rgba(5,5,6,.9);z-index:90;display:none;padding:18px}
+.editor-overlay.show{display:block}
+.editor-card{max-width:900px;margin:4vh auto;background:var(--panel);border:1px solid var(--line2);border-radius:22px;padding:20px;max-height:92vh;display:flex;flex-direction:column}
+.editor-card h3{font-family:"Sora";margin:0 0 4px;font-size:19px}
+.editor-card p{color:var(--muted);font-size:13px;margin:0 0 12px}
+.editor-card textarea{flex:1;min-height:46vh;background:var(--bg2);border:1px solid var(--line);border-radius:14px;color:var(--ink);padding:14px;font-size:14.5px;line-height:1.65;resize:vertical}
+.editor-card textarea:focus{outline:2px solid var(--accent)}
+.editor-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.editor-actions .char-count{margin-top:0}
+
+@media(max-width:780px){
+  .empty-stage{padding:12px 14px}
+  .empty-stage .big-ic{width:40px;height:40px;font-size:19px;margin-bottom:7px}
+  .empty-stage strong{font-size:15.5px}
+  .empty-stage p{font-size:12px;margin:4px auto 10px;line-height:1.5;max-width:340px}
+  .empty-stage button{padding:8px 15px;font-size:13px}
+  .adv-grid{grid-template-columns:1fr}
+  .generate{margin-left:0;width:100%;justify-content:center}
+  .searchbox{width:100%;margin-left:0}
+  .attach{flex-wrap:wrap}
+  #promptInput{min-height:150px}
+}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="logo"><span class="logo-mark">▶</span><span>Frame<em>Flow</em></span></div>
+    <div class="top-right">
+      <span class="chip">MODEL <b>VEO 3.1</b></span>
+      <span class="chip">OUTPUT <b>1080 HD</b></span>
+      <span class="avatar" title="Aiden">A</span>
+    </div>
+  </div>
+
+  <!-- PREVIEW -->
+  <section class="stage-panel" id="studio">
+    <div class="viewport-wrap">
+      <div class="viewport" id="viewport">
+        <img class="bg-blur" id="bgBlur" alt="" aria-hidden="true" style="display:none">
+        <div class="scene-wrap" id="sceneWrap"><img class="scene" id="sceneImg" alt="Video preview — tumhari image poori, bina crop ke" style="display:none"></div>
+        <div class="empty-stage" id="emptyStage">
+          <div>
+            <div class="big-ic" aria-hidden="true">🖼</div>
+            <strong>Abhi koi image nahi hai</strong>
+            <p>Neeche composer mein pehle apni image lagao — bilkul chat ki tarah. Image yahan poori dikhegi, crop nahi hogi.</p>
+            <button type="button" id="emptyUploadBtn">＋ Image Upload Karo</button>
+          </div>
+        </div>
+        <div class="scan"></div>
+        <span class="badge tl"><span class="rec-dot"></span><span id="playStateLabel">PREVIEW</span></span>
+        <span class="badge tr" id="resBadge">16:9 • 1920 × 1080 • HD</span>
+        <span class="badge bl mono" id="tcBadge">00:00 / 00:08</span>
+        <span class="badge br" id="camBadge">CAM: ZOOM IN</span>
+        <div class="lip-box" id="lipBox"><span class="lbl">LIP-SYNC</span><span class="lip-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+        <div class="gesture-tag" id="gestureTag">✋ Hand gesture</div>
+        <div class="caption-box" id="captionBox"><span class="who">CHARACTER BOL RAHA HAI — LIVE SUBTITLES</span><span id="captionText"></span></div>
+        <div class="drop-overlay"><div><strong>Image yahan chhoro</strong><span>Ye image video ka frame ban jayegi</span></div></div>
+        <div class="gen-overlay"><div>
+          <div class="pct" id="genPct">0%</div>
+          <p><strong id="genStage">Image analyse ho rahi hai…</strong></p>
+          <p class="mono" style="font-size:12px" id="genFrames">FRAME 0 / 192</p>
+        </div></div>
+      </div>
+    </div>
+    <div class="progress" aria-hidden="true"><i id="genProgress"></i></div>
+    <div class="stage-meta">
+      <span class="fit-badge">FIT: POORI IMAGE — NO CROP · NO STRETCH ✓</span>
+      <span class="mono" id="stageImgMeta">KOI IMAGE SELECT NAHI</span>
+    </div>
+    <div class="player">
+      <button class="pbtn" id="playBtn" type="button">▶ Play Preview</button>
+      <button class="pbtn secondary" id="restartBtn" type="button">↺ Restart</button>
+      <div class="timeline">
+        <div class="timeline-track" id="timelineTrack"><div class="timeline-fill" id="timelineFill"></div></div>
+        <div class="gesture-track" id="gestureTrack" aria-hidden="true"></div>
+        <div class="timecode"><span id="tcNow">00:00.0</span><span>24 FPS • <span id="tcTotal">00:08.0</span></span></div>
+      </div>
+    </div>
+    <div class="export-box" id="exportBox">
+      <h4>✅ Video tayyar hai — <span id="exportTitle">—</span></h4>
+      <p>Neeche <strong style="color:#fff">Library</strong> mein save ho gayi hai — wahan Scene Prompt aur Script alag alag dikhte hain. Download dabao to video isi ratio/size mein render ho kar milegi (recording mein utne hi second lagein ge jitni lambi video hai). Prototype format WebM hai; production mein yehi MP4 (H.264) hoga, aur asal AI awaz + lip-sync wahan lagega. Preview ki awaaz browser ki voice hai jo sirf Script bolti hai.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="pbtn" id="downloadBtn" type="button" style="background:var(--accent);color:#fff">⬇ Download — <span id="dlRatioLabel">16:9 • 1080p</span></button>
+        <button class="pbtn secondary" id="extendBtn" type="button">＋ Extend +8s</button>
+        <button class="pbtn secondary" id="cancelRecBtn" type="button" style="display:none">✕ Recording Roko</button>
+        <span class="mono" style="font-size:12px;color:#b9d9c4" id="recStatus"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EK HI COMPOSER — image + prompt + script + generate ============ -->
+  <section class="composer" id="composer">
+    <div class="composer-head">
+      <span class="ic" aria-hidden="true">💬</span>
+      <div>
+        <strong>Ek hi jagah — Image + Prompt, bilkul chat ki tarah</strong>
+        <p>Jaise chat mein karte ho: <b>1)</b> image lagao, <b>2)</b> prompt likho, <b>3)</b> agar character kuch bolay to chhoti script likho, phir <b>Generate</b> dabao. Video upar wale preview mein ban jayegi aur neeche Library mein save ho jayegi. Bas — koi alag sections, koi tayyar misalein nahi.</p>
+      </div>
+    </div>
+
+    <!-- STEP 1: IMAGE -->
+    <p class="step-label"><span><span class="step-num">1</span> Image lagao</span><span class="field-badge notspoken">📎 Chat attachment jaisa</span></p>
+    <div class="drop" id="dropZone" role="button" tabindex="0" aria-label="Image upload karo">
+      <div class="up" aria-hidden="true">↑</div>
+      <strong>Image yahan drop karo, ya click karke choose karo</strong>
+      <span>JPG, PNG, WebP • phone / computer dono se • image poori use hogi, crop nahi hogi</span>
+      <span class="browse">+ Add Image</span>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" hidden>
+    <div class="attach" id="attachChip">
+      <img id="attachThumb" alt="Attached image ki chhoti preview">
+      <div class="a-meta">
+        <strong id="attachName">—</strong>
+        <span id="attachMeta">—</span>
+        <span class="ok">✓ Image lag gayi — yehi video ka frame hai</span>
+      </div>
+      <div class="a-btns">
+        <button class="small-btn" id="changeImgBtn" type="button">↻ Badlo</button>
+        <button class="small-btn danger" id="removeImgBtn" type="button">✕ Hatao</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: PROMPT -->
+    <div class="field-block">
+      <p class="step-label"><span><span class="step-num">2</span> Prompt likho — scene kaisa ho <span class="field-badge notspoken">🔇 Ye bola NAHI jayega</span></span>
+        <span class="lab-actions">
+          <button class="mini-btn" id="expandPromptBtn" type="button">⤢ Bara Editor</button>
+          <button class="mini-btn" id="clearPromptBtn" type="button">Saaf Karo</button>
+        </span>
+      </p>
+      <textarea id="promptInput" placeholder="Scene kaisa dikhe — background, light, camera, harkat. Ye sirf visual hidayat hai, character ye NAHI bolay ga. Lamba prompt bhi yahan paste kar sakte ho — email jaisa poora plan bhi.">Create a black background video in forest, natural head movement and hand gestures while talking, warm golden light, clean background, camera slowly pushes in, subject stays sharp, cinematic lighting, smooth natural motion, photorealistic, 24fps</textarea>
+      <div class="char-count" id="charCount"></div>
+      <div class="chips">
+        <button class="chip-btn" id="enhanceBtn" type="button">✨ Cinematic Banao</button>
+        <button class="chip-btn" data-chip="camera slowly pushes in, subject stays sharp" type="button">+ Push-in</button>
+        <button class="chip-btn" data-chip="natural head movement and hand gestures while talking" type="button">+ Talking Gestures</button>
+        <button class="chip-btn" data-chip="warm golden light, clean cinematic background" type="button">+ Warm Light</button>
+        <button class="chip-btn" data-chip="photorealistic, smooth natural motion, 24fps" type="button">+ Photoreal 24fps</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: SCRIPT (optional, alag) -->
+    <div class="field-block script-block">
+      <p class="step-label"><span><span class="step-num green">3</span> Script — character kya bolay <span class="field-badge spoken">🗣 SIRF ye bola jayega</span> <span class="field-badge optional">Optional — khaali chhoro to sirf motion video banegi</span></span>
+        <span class="lab-actions"><button class="mini-btn" id="expandScriptBtn" type="button">⤢ Bara Editor</button></span>
+      </p>
+      <textarea id="scriptInput" placeholder="Sirf woh alfaaz jo character bolay ga — chhote rakho: 8–10 second mein ~20–25 alfaaz. Prompt yahan mat likho, wo upar wale box mein hai…">Assalam-o-Alaikum! Aaj main aap ko bataon gi ke sirf ek image se bolti hui video kaise banti hai.</textarea>
+      <div class="char-count" id="scriptCount"></div>
+      <div class="fit-meter" id="fitMeter">
+        <div class="fit-row">
+          <span>Alfaaz <b id="fitWords">0</b></span>
+          <span>Bolne ka time ~<b id="fitSpeak">0s</b></span>
+          <span>Video duration <b id="fitDur">8s</b></span>
+          <span class="fit-status ok" id="fitStatus">✓ Script duration mein fit hai</span>
+        </div>
+        <div class="fit-bar"><i id="fitBar"></i></div>
+        <div class="fit-actions">
+          <button class="mini-btn" id="fitDurationBtn" type="button">⏱ Duration script ke hisaab se set karo</button>
+          <button class="mini-btn" id="speakTestBtn" type="button">🔊 Script sun kar test karo (sirf script bolay gi)</button>
+        </div>
+      </div>
+      <div class="voice-row">
+        <span>Awaz:</span>
+        <button class="voice-btn on" data-voice="Natural Female" type="button">Natural Female</button>
+        <button class="voice-btn" data-voice="Confident Female" type="button">Confident Female</button>
+        <button class="voice-btn" data-voice="Urdu Female" type="button">Urdu Female</button>
+        <button class="voice-btn" data-voice="Male Presenter" type="button">Male Presenter</button>
+        <button class="voice-btn" data-voice="Soft Narrator" type="button">Soft Narrator</button>
+      </div>
+      <p class="script-note">Play dabane par preview mein <strong>asli awaaz sirf Script</strong> bolay gi (browser ki voice se) — Prompt kabhi nahi bola jata. Jis lafz par awaaz hogi, wahi lafz subtitle mein highlight hoga aur <strong>LIP-SYNC</strong> usi rhythm par chalega.</p>
+    </div>
+
+    <!-- ADVANCED (collapsed) -->
+    <details class="advanced">
+      <summary>⚙ Advanced <span>— negative prompt, camera, motion, seed (aam tor par in ko chherne ki zaroorat nahi)</span></summary>
+      <div class="adv-grid">
+        <div>
+          <label for="negInput">Negative Prompt — jo NAHI chahiye</label>
+          <textarea id="negInput" placeholder="Misal: blurry, distorted face, extra fingers, watermark…">blurry, distorted face, extra fingers, watermark, low quality, flicker</textarea>
+        </div>
+        <div>
+          <label for="cameraSelect">Camera</label>
+          <select id="cameraSelect">
+            <option value="zoom-in" selected>Zoom In — slow push-in</option>
+            <option value="zoom-out">Zoom Out — reveal shot</option>
+            <option value="pan-left">Pan Left</option>
+            <option value="pan-right">Pan Right</option>
+            <option value="orbit">Orbit — halka ghoomna</option>
+            <option value="handheld">Handheld — natural halki shake</option>
+            <option value="crane">Crane Up — neeche se upar</option>
+            <option value="static">Static — sirf subject motion</option>
+          </select>
+          <div style="margin-top:12px">
+            <div class="range-row"><span>Motion intensity</span><span id="motionVal">50%</span></div>
+            <input type="range" id="motionRange" min="10" max="100" value="50">
+          </div>
+          <div style="margin-top:10px">
+            <div class="range-row"><span>Seed (same seed = same style dobara)</span><span id="seedVal">4207</span></div>
+            <input type="range" id="seedRange" min="1" max="9999" value="4207">
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- SEND BAR -->
+    <div class="dock-bar">
+      <div class="ctl"><span class="ctl-label">MODEL</span>
+        <select id="modelSelect" aria-label="Video model">
+          <option value="Veo 3.1 - Fast" selected>Veo 3.1 — Fast</option>
+          <option value="Veo 3.1 - Quality">Veo 3.1 — Quality</option>
+          <option value="Veo 3.1 - Lite">Veo 3.1 — Lite</option>
+          <option value="Veo 2">Veo 2</option>
+        </select>
+      </div>
+      <div class="ctl"><span class="ctl-label">RATIO</span>
+        <select id="ratioSelect" aria-label="Aspect ratio">
+          <option value="16-9" selected>16:9 • 1920×1080</option>
+          <option value="9-16">9:16 • 1080×1920 (Reels)</option>
+          <option value="1-1">1:1 • 1080×1080</option>
+          <option value="4-5">4:5 • 1080×1350</option>
+          <option value="3-4">3:4 • 1080×1440</option>
+          <option value="4-3">4:3 • 1440×1080</option>
+          <option value="21-9">21:9 • 2520×1080</option>
+        </select>
+      </div>
+      <div class="ctl"><span class="ctl-label">OUTPUTS</span>
+        <span class="out-pills" id="outPills">
+          <button data-out="1" type="button">×1</button>
+          <button data-out="2" class="on" type="button">×2</button>
+          <button data-out="3" type="button">×3</button>
+          <button data-out="4" type="button">×4</button>
+        </span>
+      </div>
+      <div class="dur-pills" id="durationPills" aria-label="Duration">
+        <button class="pill on" data-dur="8" type="button">8s</button>
+        <button class="pill" data-dur="10" type="button">10s</button>
+        <button class="pill" data-dur="15" type="button">15s</button>
+        <button class="pill" data-dur="20" type="button">20s</button>
+        <button class="pill" data-dur="30" type="button">30s</button>
+      </div>
+      <button class="generate" id="generateBtn" type="button">Generate Video <span class="arr">↑</span></button>
+    </div>
+    <div class="spec-line" id="specLine"></div>
+    <p class="status-line" id="jobStatus">STATUS: <b>READY</b> — image lagao, prompt likho, Generate dabao.</p>
+  </section>
+
+  <!-- LIBRARY -->
+  <section class="library" id="library">
+    <div class="library-head">
+      <div>
+        <h2>Library — Tumhari Videos</h2>
+        <p class="sub">Jo video banti hai, yahan save ho jati hai. Har card par <strong style="color:#ffd97a">Scene Prompt</strong> aur <strong style="color:#8fe3b0">Script</strong> alag alag dikhte hain — prompt bola nahi gaya tha, script hi boli gayi thi.</p>
+      </div>
+      <div class="stats">
+        <div class="stat"><b id="statTotal">0</b><span>Videos</span></div>
+        <div class="stat"><b id="statReady">0</b><span>Ready</span></div>
+        <div class="stat"><b id="statSecs">0s</b><span>Total Time</span></div>
+        <div class="stat"><b id="statTalk">0</b><span>Bolti Hui</span></div>
+      </div>
+    </div>
+    <div class="lib-tools" id="libFilters">
+      <button class="filter-btn on" data-filter="all" type="button">All</button>
+      <button class="filter-btn" data-filter="ready" type="button">Ready</button>
+      <button class="filter-btn" data-filter="talk" type="button">Bolti Hui</button>
+      <button class="filter-btn" data-filter="motion" type="button">Bina Dialogue</button>
+      <button class="filter-btn" id="clearLibBtn" type="button">🗑 Saaf Karo</button>
+      <input class="searchbox" id="libSearch" type="search" placeholder="Search videos…">
+    </div>
+    <div class="lib-grid" id="libGrid"></div>
+    <div class="empty" id="libEmpty">
+      <strong>Abhi library khaali hai</strong>
+      Upar composer se pehli video generate karo — wo foran yahan aa jayegi (is session ke liye record rahegi).
+    </div>
+  </section>
+
+  <footer><span>FrameFlow Studio — ek hi composer: Image + Prompt (+ chhoti Script) se video • aam tor par 8–10 sec • 1080 HD</span><span class="mono">PROTOTYPE v4 — ONE COMPOSER</span></footer>
+</div>
+
+<!-- FULL-SCREEN EDITOR -->
+<div class="editor-overlay" id="editorOverlay" role="dialog" aria-modal="true" aria-label="Bara editor">
+  <div class="editor-card">
+    <h3 id="editorTitle">Bara Prompt Editor</h3>
+    <p>Yahan jitna marzi lamba likho ya paste karo — hazaaron lines ka prompt / plan sab chalega. Ho jaye to “Lagao” dabao.</p>
+    <textarea id="editorText" placeholder="Yahan lamba text likho ya paste karo…"></textarea>
+    <div class="editor-actions">
+      <button class="pbtn" id="editorApply" type="button" style="background:var(--accent);color:#fff">✓ Lagao (Apply)</button>
+      <button class="pbtn secondary" id="editorClose" type="button">Band Karo</button>
+      <span class="char-count" id="editorCount"></span>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var RATIOS={'16-9':{label:'16:9',w:1920,h:1080},'9-16':{label:'9:16',w:1080,h:1920},'1-1':{label:'1:1',w:1080,h:1080},'4-5':{label:'4:5',w:1080,h:1350},'3-4':{label:'3:4',w:1080,h:1440},'4-3':{label:'4:3',w:1440,h:1080},'21-9':{label:'21:9',w:2520,h:1080}};
+  var $=function(id){return document.getElementById(id)};
+  var scene=$('sceneImg'), sceneWrap=$('sceneWrap'), bgBlur=$('bgBlur'), viewport=$('viewport');
+  var promptEl=$('promptInput'), scriptEl=$('scriptInput'), negEl=$('negInput');
+
+  var state={duration:8,camera:'zoom-in',motion:50,seed:4207,ratio:'16-9',playing:false,elapsedBefore:0,generated:false,recording:false,voice:'Natural Female',model:'Veo 3.1 - Fast',outputs:2,filter:'all',search:'',asset:null};
+  var SPEECH_WPS=2.4;
+  var library=[]; var libSeq=0;
+
+  function ratioInfo(){return RATIOS[state.ratio]||RATIOS['16-9']}
+  function talking(){return !!scriptEl.value.trim()}
+  function fmt(s){var m=Math.floor(s/60),sec=Math.floor(s%60);return (m<10?'0':'')+m+':'+(sec<10?'0':'')+sec}
+  function fmt1(s){var m=Math.floor(s/60),sec=(s%60).toFixed(1);return (m<10?'0':'')+m+':'+(sec<10?'0':'')+sec}
+  function toast(msg){var t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},3600)}
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+  function nowTime(){var d=new Date();var h=d.getHours(),m=d.getMinutes();var ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+(m<10?'0':'')+m+' '+ap}
+  function counts(text){var t=String(text||'');return{chars:t.length,words:t.trim()?t.trim().split(/\s+/).length:0,lines:t?t.split(/\n/).length:0}}
+  function scriptWords(){return scriptEl.value.trim().split(/\s+/).filter(Boolean)}
+
+  /* ---------- Image: upload / drag-drop / attachment chip ---------- */
+  var drop=$('dropZone'), fileInput=$('fileInput');
+  function openPicker(){fileInput.click()}
+  drop.addEventListener('click',openPicker);
+  drop.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openPicker()}});
+  $('changeImgBtn').addEventListener('click',openPicker);
+  $('emptyUploadBtn').addEventListener('click',openPicker);
+  fileInput.addEventListener('change',function(){if(fileInput.files[0])loadFile(fileInput.files[0]);fileInput.value=''});
+  ['dragover','dragenter'].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.add('drag')})});
+  ['dragleave','drop'].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.remove('drag')})});
+  drop.addEventListener('drop',function(e){e.stopPropagation();var f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f)loadFile(f)});
+  ['dragover','dragenter'].forEach(function(ev){viewport.addEventListener(ev,function(e){e.preventDefault();viewport.classList.add('drag-over')})});
+  viewport.addEventListener('dragleave',function(e){if(e.target===viewport)viewport.classList.remove('drag-over')});
+  viewport.addEventListener('drop',function(e){e.preventDefault();viewport.classList.remove('drag-over');var f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f)loadFile(f)});
+  $('composer').addEventListener('dragover',function(e){e.preventDefault()});
+  $('composer').addEventListener('drop',function(e){var f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f){e.preventDefault();loadFile(f)}});
+
+  function loadFile(f){
+    if(!f.type.match('image.*')){toast('Ye image file nahi hai — JPG/PNG choose karo');return}
+    var url=URL.createObjectURL(f);
+    var a={src:url,name:f.name.replace(/\.[^.]+$/,''),kind:'UPLOADED',meta:'Tumhari upload • '+Math.round(f.size/1024)+' KB',w:0,h:0,dims:''};
+    var probe=new Image();
+    probe.onload=function(){a.w=probe.naturalWidth;a.h=probe.naturalHeight;a.dims=probe.naturalWidth+'×'+probe.naturalHeight;setAsset(a);toast('Image lag gayi — ab prompt check karo aur Generate dabao')};
+    probe.onerror=function(){setAsset(a)};
+    probe.src=url;
+  }
+  function setAsset(a){
+    state.asset=a;
+    scene.src=a.src; scene.style.display='block';
+    bgBlur.src=a.src; bgBlur.style.display='block';
+    $('emptyStage').classList.add('hide');
+    $('attachThumb').src=a.src;
+    $('attachName').textContent=a.name;
+    $('attachMeta').textContent=(a.dims?a.dims+' • ':'')+(a.meta||'');
+    $('attachChip').classList.add('show');
+    drop.style.display='none';
+    resetPlayback(); updateSpec(); renderGestureTrack();
+  }
+  function clearAsset(){
+    state.asset=null; stopSpeech();
+    scene.removeAttribute('src'); scene.style.display='none';
+    bgBlur.removeAttribute('src'); bgBlur.style.display='none';
+    $('emptyStage').classList.remove('hide');
+    $('attachChip').classList.remove('show');
+    drop.style.display='block';
+    resetPlayback(); updateSpec(); renderGestureTrack();
+  }
+  $('removeImgBtn').addEventListener('click',function(){clearAsset();toast('Image hata di — nayi lagao')});
+
+  /* ---------- Prompt / Script counts + fit meter ---------- */
+  function speakSeconds(){var w=scriptWords().length;return w?Math.max(1,Math.round(w/SPEECH_WPS)):0}
+  function updateFitMeter(){
+    var w=scriptWords().length, need=speakSeconds(), dur=state.duration;
+    $('fitWords').textContent=w;
+    $('fitSpeak').textContent=need+'s';
+    $('fitDur').textContent=dur+'s';
+    var st=$('fitStatus'), bar=$('fitBar');
+    var pct=dur?Math.min(100,Math.round(need/dur*100)):0;
+    bar.style.width=pct+'%';
+    if(!w){st.textContent='Script khaali hai — sirf motion video banegi, koi kuch nahi bolay ga';st.className='fit-status warn';bar.classList.add('over');return}
+    if(need<=dur){st.textContent='✓ Script '+dur+'s mein fit hai — poori bolay gi';st.className='fit-status ok';bar.classList.remove('over')}
+    else{st.textContent='⚠ Script lambi hai — '+dur+'s mein poori NAHI bolay gi. Duration '+need+'s karo ya script chhoti karo';st.className='fit-status warn';bar.classList.add('over')}
+  }
+  function updateCounts(){
+    var c=counts(promptEl.value);
+    $('charCount').innerHTML='<span>Characters <b>'+c.chars.toLocaleString()+'</b></span><span>Words <b>'+c.words.toLocaleString()+'</b></span><span>Lines <b>'+c.lines.toLocaleString()+'</b></span><span class="free">🔇 Sirf scene description — bola NAHI jayega, subtitles mein NAHI aayega. Koi limit nahi.</span>';
+    var s=counts(scriptEl.value);
+    $('scriptCount').innerHTML='<span>Script: <b>'+s.chars.toLocaleString()+'</b> characters • <b>'+s.words.toLocaleString()+'</b> words</span><span class="free">🗣 Sirf yehi bola jayega — 8–10s ke liye ~20–25 alfaaz best hain</span>';
+    updateFitMeter();
+  }
+  promptEl.addEventListener('input',updateCounts);
+  scriptEl.addEventListener('input',function(){stopSpeech();updateCounts();renderGestureTrack();updateCaptions(0);updateSpec()});
+  $('clearPromptBtn').addEventListener('click',function(){promptEl.value='';updateCounts();promptEl.focus()});
+  $('fitDurationBtn').addEventListener('click',function(){
+    var need=speakSeconds();
+    if(!need){toast('Pehle script likho — phir duration us ke hisaab se lagega');scriptEl.focus();return}
+    var opts=[8,10,15,20,30], pick=opts[opts.length-1];
+    for(var i=0;i<opts.length;i++){if(opts[i]>=need){pick=opts[i];break}}
+    setDuration(pick);
+    toast('Duration '+pick+'s set ho gaya — script (~'+need+'s bolna) is mein fit hai');
+  });
+  $('speakTestBtn').addEventListener('click',function(){
+    if(!scriptEl.value.trim()){toast('Script khaali hai — jo bolwana hai woh script mein likho (prompt bola nahi jata)');scriptEl.focus();return}
+    speakScript();
+    toast('Sun lo: sirf Script boli ja rahi hai — Prompt ka ek lafz bhi nahi');
+  });
+  $('enhanceBtn').addEventListener('click',function(){
+    var v=promptEl.value.trim(); if(!v){toast('Pehle kuch prompt likho');return}
+    promptEl.value=v.replace(/[.,\s]+$/,'')+', cinematic lighting, smooth natural motion, photorealistic, subject stays sharp, 24fps';
+    updateCounts(); toast('Prompt cinematic bana diya');
+  });
+  document.querySelectorAll('[data-chip]').forEach(function(b){b.addEventListener('click',function(){
+    var v=promptEl.value.trim();
+    promptEl.value=(v?v.replace(/[.,\s]+$/,'')+', ':'')+b.getAttribute('data-chip');
+    updateCounts();
+  })});
+  document.querySelectorAll('.voice-btn').forEach(function(b){b.addEventListener('click',function(){
+    document.querySelectorAll('.voice-btn').forEach(function(x){x.classList.remove('on')});b.classList.add('on');state.voice=b.getAttribute('data-voice');updateSpec();
+  })});
+
+  /* Full-screen editor */
+  var editorTarget='prompt';
+  function openEditor(which){
+    editorTarget=which;
+    $('editorTitle').textContent=which==='script'?'Bara Script Editor — character kya bolay ga':'Bara Prompt Editor';
+    $('editorText').value=which==='script'?scriptEl.value:promptEl.value;
+    updateEditorCount();
+    $('editorOverlay').classList.add('show');
+    $('editorText').focus();
+  }
+  function updateEditorCount(){
+    var c=counts($('editorText').value);
+    $('editorCount').innerHTML='<span>Characters <b>'+c.chars.toLocaleString()+'</b></span><span>Words <b>'+c.words.toLocaleString()+'</b></span><span>Lines <b>'+c.lines.toLocaleString()+'</b></span>';
+  }
+  $('editorText').addEventListener('input',updateEditorCount);
+  $('expandPromptBtn').addEventListener('click',function(){openEditor('prompt')});
+  $('expandScriptBtn').addEventListener('click',function(){openEditor('script')});
+  $('editorClose').addEventListener('click',function(){$('editorOverlay').classList.remove('show')});
+  $('editorApply').addEventListener('click',function(){
+    if(editorTarget==='script'){scriptEl.value=$('editorText').value;renderGestureTrack()}
+    else{promptEl.value=$('editorText').value}
+    updateCounts(); $('editorOverlay').classList.remove('show');
+    toast('Lag gaya — '+counts($('editorText').value).chars.toLocaleString()+' characters ka text tayyar hai');
+  });
+  $('editorOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
+
+  /* ---------- Settings: duration / ratio / model / outputs / camera ---------- */
+  document.querySelectorAll('#durationPills .pill').forEach(function(p){p.addEventListener('click',function(){setDuration(parseInt(p.getAttribute('data-dur'),10))})});
+  function setDuration(d){
+    state.duration=d;
+    document.querySelectorAll('#durationPills .pill').forEach(function(x){x.classList.toggle('on',parseInt(x.getAttribute('data-dur'),10)===d)});
+    updateSpec(); resetPlayback(); updateFitMeter(); renderGestureTrack();
+  }
+  $('ratioSelect').addEventListener('change',function(){setRatio(this.value,true)});
+  function setRatio(r,announce){
+    state.ratio=r; $('ratioSelect').value=r;
+    viewport.className='viewport ratio-'+r+(viewport.classList.contains('generating')?' generating':'')+(viewport.classList.contains('drag-over')?' drag-over':'');
+    updateSpec();
+    if(announce){var ri=ratioInfo();toast(ri.label+' ratio — '+ri.w+'×'+ri.h)}
+  }
+  $('modelSelect').addEventListener('change',function(){state.model=this.value;updateSpec();toast('Model: '+state.model)});
+  document.querySelectorAll('#outPills button').forEach(function(b){b.addEventListener('click',function(){
+    document.querySelectorAll('#outPills button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');
+    state.outputs=parseInt(b.getAttribute('data-out'),10);updateSpec();
+  })});
+  $('cameraSelect').addEventListener('change',function(){state.camera=this.value;updateSpec()});
+  $('motionRange').addEventListener('input',function(e){state.motion=parseInt(e.target.value,10);$('motionVal').textContent=state.motion+'%';updateSpec()});
+  $('seedRange').addEventListener('input',function(e){state.seed=parseInt(e.target.value,10);$('seedVal').textContent=state.seed;updateSpec()});
+
+  function updateSpec(){
+    var r=ratioInfo(), a=state.asset, frames=state.duration*24;
+    $('specLine').innerHTML='IMAGE <b>'+(a?esc(a.name.toUpperCase()):'— NAHI LAGI')+'</b> • MODEL <b>'+esc(state.model.toUpperCase())+'</b> • OUT <b>×'+state.outputs+'</b>'
+      +(talking()?'<br>SCRIPT <b>BOLAY GI</b> • AWAZ <b>'+esc(state.voice.toUpperCase())+'</b> • PROMPT <b>NAHI BOLAY GA</b>':'<br>SCRIPT <b>KHAALI — SIRF MOTION VIDEO</b>')
+      +'<br>RATIO <b>'+r.label+' • '+r.w+' × '+r.h+' HD</b> • DURATION <b>'+state.duration+' SEC</b> • <b>'+frames+' FRAMES</b> @24FPS'
+      +'<br>CAMERA <b>'+state.camera.replace(/-/g,' ').toUpperCase()+'</b> • MOTION <b>'+state.motion+'%</b> • SEED <b>'+state.seed+'</b> • FORMAT <b>WebM proto / MP4 prod</b>';
+    $('tcBadge').textContent='00:00 / '+fmt(state.duration);
+    $('tcTotal').textContent=fmt1(state.duration);
+    $('camBadge').textContent='CAM: '+state.camera.replace(/-/g,' ').toUpperCase();
+    $('resBadge').textContent=r.label+' • '+r.w+' × '+r.h+' • HD';
+    $('dlRatioLabel').textContent=r.label+' • '+r.w+'×'+r.h;
+    $('stageImgMeta').textContent=a?(a.name.toUpperCase()+' • '+a.kind+(a.dims?' • '+a.dims:'')):'KOI IMAGE SELECT NAHI';
+  }
+
+  /* ---------- Playback ---------- */
+  function transformFor(p,elapsed){
+    var m=state.motion/100,s=1,x=0,y=0,r=0;
+    switch(state.camera){
+      case 'zoom-in': s=1+(0.045*m)*p; break;
+      case 'zoom-out': s=1+(0.045*m)*(1-p); break;
+      case 'pan-left': x=(1.1*m)*(1-2*p); break;
+      case 'pan-right': x=(-1.1*m)*(1-2*p); break;
+      case 'orbit': x=Math.sin(p*Math.PI*2)*0.7*m; y=Math.cos(p*Math.PI*2)*0.45*m; r=Math.sin(p*Math.PI*2)*0.25*m; break;
+      case 'handheld': x=Math.sin(elapsed*1.7)*0.35*m; y=Math.cos(elapsed*2.3)*0.3*m; break;
+      case 'crane': y=(2.2*m)*(1-p)-1.1*m; s=1+(0.03*m)*p; break;
+      default: s=1+Math.sin(p*Math.PI*2)*0.004*m;
+    }
+    if(talking()){ y+=Math.sin(elapsed*2.1)*0.3; s*=1+Math.sin(elapsed*1.4)*0.004; }
+    return 'scale('+s.toFixed(4)+') translate('+x.toFixed(3)+'%,'+y.toFixed(3)+'%) rotate('+r.toFixed(3)+'deg)';
+  }
+  var GESTURES=['✋ Hand gesture','👉 Point gesture','🙌 Dono haath','✋ Open palm','👍 Emphasis'];
+  function gestureAt(p){
+    if(!talking())return -1;
+    var n=Math.max(2,Math.min(5,Math.round(state.duration/5)));
+    for(var i=0;i<n;i++){var gp=(i+0.5)/n; if(Math.abs(p-gp)<0.045)return i%GESTURES.length}
+    return -1;
+  }
+  function renderGestureTrack(){
+    var t=$('gestureTrack'); if(!t)return; t.innerHTML='';
+    if(!talking()||!state.asset)return;
+    var n=Math.max(2,Math.min(5,Math.round(state.duration/5)));
+    for(var i=0;i<n;i++){
+      var s=document.createElement('span'); s.className='gmark'; s.style.left=(((i+0.5)/n)*100)+'%';
+      s.textContent='✋ gesture'; t.appendChild(s);
+    }
+  }
+  /* Asli awaaz: SIRF Script — Prompt kabhi nahi */
+  var voiceActive=false, spokenWordIdx=-1, speechCycle=-1;
+  function wordIndexAtChar(text,charIdx){var upto=String(text).slice(0,charIdx+1).trim();return upto?upto.split(/\s+/).length-1:0}
+  function speakScript(){
+    var text=scriptEl.value.trim();
+    if(!text)return;
+    if(!('speechSynthesis' in window))return;
+    try{
+      speechSynthesis.cancel();
+      var u=new SpeechSynthesisUtterance(text);
+      u.rate=1; u.pitch=state.voice==='Male Presenter'?0.92:1.03;
+      u.lang=state.voice==='Urdu Female'?'ur-PK':'en-US';
+      var vs=speechSynthesis.getVoices()||[], chosen=null, i, nm, lg;
+      for(i=0;i<vs.length;i++){nm=(vs[i].name||'').toLowerCase(); lg=(vs[i].lang||'').toLowerCase();
+        if(state.voice==='Urdu Female'&&lg.indexOf('ur')===0){chosen=vs[i];break}
+        if(state.voice==='Male Presenter'&&(nm.indexOf('david')>=0||nm.indexOf('daniel')>=0||nm.indexOf('male')>=0)){chosen=vs[i];break}
+        if(state.voice!=='Male Presenter'&&state.voice!=='Urdu Female'&&(nm.indexOf('zira')>=0||nm.indexOf('samantha')>=0||nm.indexOf('female')>=0||nm.indexOf('aria')>=0||nm.indexOf('jenny')>=0||nm.indexOf('veena')>=0)){chosen=vs[i];break}
+      }
+      if(chosen)u.voice=chosen;
+      u.onboundary=function(e){if(typeof e.charIndex==='number'){spokenWordIdx=wordIndexAtChar(text,e.charIndex);var p=state.duration?(state.elapsedBefore%state.duration)/state.duration:0;updateCaptions(p)}};
+      u.onstart=function(){voiceActive=true;$('lipBox').classList.add('show');sceneWrap.classList.add('talking');$('captionBox').classList.add('show')};
+      u.onend=u.onerror=function(){voiceActive=false;spokenWordIdx=-1;if(!state.playing){$('lipBox').classList.remove('show');sceneWrap.classList.remove('talking')}};
+      speechSynthesis.speak(u);
+    }catch(e){}
+  }
+  function stopSpeech(){if('speechSynthesis' in window){try{speechSynthesis.cancel()}catch(e){}}voiceActive=false;spokenWordIdx=-1;speechCycle=-1}
+  function updateCaptions(p){
+    var show=talking()&&(state.playing||state.generated||voiceActive);
+    $('captionBox').classList.toggle('show',!!show);
+    $('lipBox').classList.toggle('show',!!(talking()&&(state.playing||voiceActive)));
+    sceneWrap.classList.toggle('talking',!!(talking()&&(state.playing||voiceActive)));
+    var g=talking()&&state.playing?gestureAt(p):-1;
+    $('gestureTag').classList.toggle('show',g>=0);
+    if(g>=0)$('gestureTag').textContent=GESTURES[g];
+    if(!show)return;
+    var w=scriptWords(), idx=(voiceActive&&spokenWordIdx>=0)?Math.min(w.length-1,spokenWordIdx):Math.min(w.length-1,Math.floor(p*w.length));
+    var start=Math.max(0,Math.floor(idx/6)*6), html='';
+    for(var i=start;i<Math.min(w.length,start+6);i++){
+      html+=(i===idx?'<span class="cur">'+esc(w[i])+'</span>':esc(w[i]))+' ';
+    }
+    $('captionText').innerHTML=html;
+  }
+  var raf=null,lastTs=null;
+  function loop(ts){
+    if(!state.playing)return;
+    if(lastTs==null)lastTs=ts;
+    var dt=(ts-lastTs)/1000; lastTs=ts;
+    state.elapsedBefore+=dt;
+    var elapsed=state.elapsedBefore, p=(elapsed%state.duration)/state.duration;
+    if(talking()){var cyc=Math.floor(elapsed/state.duration);if(cyc!==speechCycle){speechCycle=cyc;speakScript()}}
+    scene.style.transform=transformFor(p,elapsed);
+    $('timelineFill').style.width=(p*100)+'%';
+    $('tcNow').textContent=fmt1(elapsed%state.duration);
+    $('tcBadge').textContent=fmt(elapsed%state.duration)+' / '+fmt(state.duration);
+    updateCaptions(p);
+    raf=requestAnimationFrame(loop);
+  }
+  function play(){
+    if(!state.asset){toast('Pehle composer mein image lagao — phir preview chalega');document.getElementById('composer').scrollIntoView({behavior:'smooth'});return}
+    if(state.playing)return;state.playing=true;speechCycle=-1;lastTs=null;$('playBtn').textContent='⏸ Pause';$('playStateLabel').textContent=talking()?'BOL RAHA HAI':'PLAYING';updateCaptions(0);raf=requestAnimationFrame(loop)
+  }
+  function pause(){state.playing=false;stopSpeech();$('playBtn').textContent='▶ Play Preview';$('playStateLabel').textContent=state.generated?'RESULT':'PREVIEW';$('lipBox').classList.remove('show');$('gestureTag').classList.remove('show');sceneWrap.classList.remove('talking');if(raf)cancelAnimationFrame(raf)}
+  function resetPlayback(){pause();state.elapsedBefore=0;scene.style.transform='scale(1)';$('timelineFill').style.width='0%';$('tcNow').textContent='00:00.0';$('tcBadge').textContent='00:00 / '+fmt(state.duration);updateCaptions(0)}
+  $('playBtn').addEventListener('click',function(){state.playing?pause():play()});
+  $('restartBtn').addEventListener('click',function(){resetPlayback();play()});
+  $('timelineTrack').addEventListener('click',function(e){
+    var r=this.getBoundingClientRect(),p=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width));
+    state.elapsedBefore=p*state.duration;scene.style.transform=transformFor(p,p*state.duration);$('timelineFill').style.width=(p*100)+'%';$('tcNow').textContent=fmt1(p*state.duration);updateCaptions(p);
+  });
+
+  /* ---------- Generation ---------- */
+  $('generateBtn').addEventListener('click',function(){
+    if(!state.asset){toast('Step 1 reh gaya: pehle composer mein apni image lagao');drop.scrollIntoView({behavior:'smooth',block:'center'});return}
+    if(!promptEl.value.trim()){toast('Step 2 reh gaya: Scene Prompt likho — ye sirf visual description hai, bola nahi jata');promptEl.focus();return}
+    if(talking()&&speakSeconds()>state.duration){toast('⚠ Script ~'+speakSeconds()+'s ki hai lekin duration '+state.duration+'s hai — poori nahi bolay gi. Fit-meter se duration barhao ya script chhoti karo')}
+    pause(); resetPlayback(); viewport.classList.add('generating'); $('generateBtn').disabled=true;
+    var talkStages=[[0,'Image analyse ho rahi hai — character pehchana ja raha hai…'],[14,'Prompt parha ja raha hai — sirf visual plan ke liye (ye bola NAHI jayega)…'],[30,'Sirf Script se awaz ban rahi hai ('+state.voice+') — prompt ka ek lafz bhi nahi…'],[48,'Lip-sync: labon ki harkat script ke har lafz se milayi ja rahi hai…'],[62,'Sar ki natural harkat + haath ke ishare choreograph ho rahe hain…'],[76,'Frames render ho rahe hain (24 fps)…'],[90,'1080p upscale + sharpen ho raha hai…'],[97,'Encode ho raha hai…']];
+    var stdStages=[[0,'Image analyse ho rahi hai…'],[16,'Prompt parha ja raha hai — sirf motion/visual plan ke liye…'],[36,'Model ('+state.model+') frames bana raha hai (24 fps)…'],[58,'Camera path + motion smooth ho raha hai…'],[76,'1080p upscale + sharpen ho raha hai…'],[90,'Encode ho raha hai…'],[97,'Final touches…']];
+    var stages=talking()?talkStages:stdStages;
+    $('jobStatus').innerHTML='STATUS: <b style="color:var(--amber)">GENERATING ×'+state.outputs+'…</b> — '+state.duration+'s • '+ratioInfo().label+' • '+esc(state.model)+' • '+esc(state.asset.name);
+    $('exportBox').classList.remove('show');
+    var totalFrames=state.duration*24,start=Date.now(),simMs=4200;
+    var iv=setInterval(function(){
+      var p=Math.min(1,(Date.now()-start)/simMs),pct=Math.round(p*100);
+      $('genPct').textContent=pct+'%'; $('genProgress').style.width=pct+'%';
+      $('genFrames').textContent='FRAME '+Math.round(p*totalFrames)+' / '+totalFrames;
+      var st=stages[0][1]; stages.forEach(function(s){if(pct>=s[0])st=s[1]}); $('genStage').textContent=st;
+      if(p>=1){
+        clearInterval(iv); viewport.classList.remove('generating'); $('generateBtn').disabled=false; $('genProgress').style.width='0%';
+        state.generated=true;
+        for(var k=0;k<state.outputs;k++) addToLibrary(k+1);
+        $('jobStatus').innerHTML='STATUS: <b>DONE ✓</b> — '+state.outputs+' variant(s) ban gaye • '+esc(state.asset.name)+' • '+state.duration+'s • '+ratioInfo().label+' • library mein save.';
+        $('exportTitle').textContent=state.asset.name+' • '+state.duration+' sec • '+ratioInfo().label+' • '+ratioInfo().w+'×'+ratioInfo().h+' • '+state.model;
+        $('exportBox').classList.add('show');
+        document.getElementById('studio').scrollIntoView({behavior:'smooth'});
+        play();
+        toast(state.outputs+' video(s) tayyar — library mein save ho gayi');
+      }
+    },60);
+  });
+
+  /* ---------- Library ---------- */
+  function addToLibrary(variant){
+    libSeq++;
+    var a=state.asset,r=ratioInfo();
+    library.unshift({id:libSeq,src:a.src,name:a.name+(variant?' — V'+variant:''),prompt:promptEl.value.trim(),script:scriptEl.value.trim(),neg:negEl.value.trim(),voice:state.voice,model:state.model,seed:state.seed+((variant||1)-1),duration:state.duration,ratio:state.ratio,ratioLabel:r.label,w:r.w,h:r.h,camera:state.camera,motion:state.motion,time:nowTime(),status:'Ready',assetDims:a.dims||'',assetW:a.w||0,assetH:a.h||0,assetMeta:a.meta||''});
+    renderLibrary();
+  }
+  function renderLibrary(){
+    var grid=$('libGrid'); grid.innerHTML='';
+    var totalSecs=0,talkCount=0;
+    library.forEach(function(v){totalSecs+=v.duration;if(v.script)talkCount++});
+    $('statTotal').textContent=library.length;
+    $('statReady').textContent=library.filter(function(v){return v.status==='Ready'}).length;
+    $('statSecs').textContent=totalSecs+'s';
+    $('statTalk').textContent=talkCount;
+    $('libEmpty').style.display=library.length?'none':'block';
+    var shown=0;
+    library.forEach(function(v){
+      if(state.filter==='ready'&&v.status!=='Ready')return;
+      if(state.filter==='talk'&&!v.script)return;
+      if(state.filter==='motion'&&v.script)return;
+      if(state.search&&((v.name+' '+v.prompt+' '+(v.script||'')).toLowerCase().indexOf(state.search)<0))return;
+      shown++;
+      var card=document.createElement('div'); card.className='lib-card';
+      card.innerHTML='<div class="thumb"><img src="" alt=""><span class="mode-badge '+(v.script?'talk':'')+'">'+(v.script?'🗣 BOLTI HUI':'🎞 MOTION')+'</span><span class="dur-badge">'+v.duration+'s</span></div>'
+        +'<div class="lib-body"><strong>'+esc(v.name)+'</strong>'
+        +'<p class="prompt-txt"><span class="k">🔇 SCENE PROMPT — BOLA NAHI GAYA</span>"'+esc(v.prompt)+'"</p>'
+        +(v.script?'<p class="prompt-txt say"><span class="k">🗣 SCRIPT — YE BOLA GAYA</span>"'+esc(v.script)+'"</p>':'<p class="prompt-txt say"><span class="k">🗣 SCRIPT</span>(koi dialogue nahi — sirf motion video thi)</p>')
+        +'<div class="meta-line">'+esc(v.model)+' • '+v.ratioLabel+' • '+v.w+'×'+v.h+' • '+esc(v.camera.replace(/-/g,' ').toUpperCase())+' • SEED '+v.seed+'<br>Bani: '+v.time+' • <span class="st">● READY</span></div>'
+        +'<div class="lib-actions"><button class="primary" data-act="play" type="button">▶ Play</button><button data-act="dl" type="button">⬇ Down</button><button data-act="extend" type="button">+8s Extend</button><button data-act="reuse" type="button">↻ Dobara</button><button data-act="del" type="button">🗑</button></div></div>';
+      var im=card.querySelector('img'); im.src=v.src; im.alt=v.name;
+      card.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){libAction(v,b.getAttribute('data-act'))})});
+      grid.appendChild(card);
+    });
+    if(library.length&&!shown){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><strong>Is filter / search mein kuch nahi mila</strong>Doosra filter try karo, ya nayi video banao.</div>'}
+  }
+  function loadIntoStudio(v){
+    setAsset({src:v.src,name:v.name.replace(/ — V\d+$/,''),kind:'LIBRARY',meta:v.assetMeta||'Library se wapas layi gayi',dims:v.assetDims||'',w:v.assetW||0,h:v.assetH||0});
+    promptEl.value=v.prompt; scriptEl.value=v.script||''; if(v.neg)negEl.value=v.neg;
+    setDuration(v.duration); setRatio(v.ratio,false);
+    state.camera=v.camera; $('cameraSelect').value=v.camera;
+    state.motion=v.motion; $('motionRange').value=v.motion; $('motionVal').textContent=v.motion+'%';
+    state.model=v.model; $('modelSelect').value=v.model;
+    state.voice=v.voice||state.voice;
+    document.querySelectorAll('.voice-btn').forEach(function(x){x.classList.toggle('on',x.getAttribute('data-voice')===state.voice)});
+    state.generated=true; updateSpec(); updateCounts(); renderGestureTrack();
+    $('exportTitle').textContent=v.name+' • '+v.duration+' sec • '+v.ratioLabel;
+    $('exportBox').classList.add('show');
+  }
+  function libAction(v,act){
+    if(act==='del'){library=library.filter(function(x){return x.id!==v.id});renderLibrary();toast('Library se hata di');return}
+    if(act==='extend'){
+      v.duration+=8; v.status='Ready'; renderLibrary(); loadIntoStudio(v);
+      toast('Extend ho gaya — ab ye video '+v.duration+'s ki hai (+8s jud gaya)');
+      return;
+    }
+    loadIntoStudio(v);
+    document.getElementById('studio').scrollIntoView({behavior:'smooth'});
+    if(act==='play'){resetPlayback();play();toast('Library wali video chal rahi hai')}
+    if(act==='reuse'){toast('Purani image + prompt + script composer mein lag gaye — Generate dabao, nayi copy banegi')}
+    if(act==='dl'){toast('Download render shuru ho raha hai…');setTimeout(startRecording,350)}
+  }
+  document.querySelectorAll('#libFilters .filter-btn[data-filter]').forEach(function(b){b.addEventListener('click',function(){
+    document.querySelectorAll('#libFilters .filter-btn[data-filter]').forEach(function(x){x.classList.remove('on')});b.classList.add('on');
+    state.filter=b.getAttribute('data-filter');renderLibrary();
+  })});
+  $('libSearch').addEventListener('input',function(){state.search=this.value.trim().toLowerCase();renderLibrary()});
+  $('clearLibBtn').addEventListener('click',function(){
+    if(!library.length){toast('Library pehle hi khaali hai');return}
+    library=[]; renderLibrary(); toast('Library saaf kar di');
+  });
+  $('extendBtn').addEventListener('click',function(){
+    setDuration(Math.min(60,state.duration+8));
+    toast('Extend: duration ab '+state.duration+'s — Generate dabao to naya lamba version banega');
+  });
+
+  /* ---------- Download recording (selected ratio, poori image contain, subtitles = sirf script) ---------- */
+  $('downloadBtn').addEventListener('click',startRecording);
+  function startRecording(){
+    if(state.recording)return;
+    if(!state.asset){toast('Pehle image lagao — download ke liye video chahiye');return}
+    var img=new Image(); img.crossOrigin='anonymous';
+    img.onload=function(){
+      var r=ratioInfo();
+      var canvas=document.createElement('canvas'); canvas.width=r.w; canvas.height=r.h;
+      var ctx=canvas.getContext('2d');
+      var stream=canvas.captureStream(24);
+      var mime=(window.MediaRecorder&&MediaRecorder.isTypeSupported('video/webm;codecs=vp9'))?'video/webm;codecs=vp9':'video/webm';
+      var rec; try{rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:8000000})}catch(e){toast('Is browser mein recording support nahi');return}
+      var chunks=[]; rec.ondataavailable=function(e){if(e.data.size)chunks.push(e.data)};
+      var start=Date.now(),durMs=state.duration*1000,cancelled=false;
+      state.recording=true; $('downloadBtn').disabled=true; $('cancelRecBtn').style.display='inline-block';
+      $('cancelRecBtn').onclick=function(){cancelled=true;try{rec.stop()}catch(e){}};
+      function draw(){
+        var p=Math.min(1,(Date.now()-start)/durMs);
+        var cw=canvas.width,ch=canvas.height,ir=img.naturalWidth/img.naturalHeight,cr=cw/ch,dw,dh,bw2,bh2;
+        var m=state.motion/100,scale=1,tx=0,ty=0,elapsed=(Date.now()-start)/1000;
+        if(state.camera==='zoom-in')scale=1+(0.045*m)*p;
+        else if(state.camera==='zoom-out')scale=1+(0.045*m)*(1-p);
+        else if(state.camera==='pan-left')tx=(0.011*m)*(1-2*p)*cw;
+        else if(state.camera==='pan-right')tx=(-0.011*m)*(1-2*p)*cw;
+        else if(state.camera==='orbit'){tx=Math.sin(p*Math.PI*2)*0.007*m*cw;ty=Math.cos(p*Math.PI*2)*0.0045*m*ch}
+        else if(state.camera==='handheld'){tx=Math.sin(elapsed*1.7)*0.0035*m*cw;ty=Math.cos(elapsed*2.3)*0.003*m*ch}
+        else if(state.camera==='crane'){ty=((2.2*m)*(1-p)-1.1*m)/100*ch;scale=1+(0.03*m)*p}
+        if(talking()){ty+=Math.sin(elapsed*2.1)*0.003*ch}
+        ctx.fillStyle='#000'; ctx.fillRect(0,0,cw,ch);
+        if(ir>cr){bh2=ch;bw2=ch*ir}else{bw2=cw;bh2=cw/ir}
+        ctx.save(); ctx.globalAlpha=.5; try{ctx.filter='blur(24px) brightness(.6)'}catch(e){}
+        ctx.drawImage(img,(cw-bw2)/2,(ch-bh2)/2,bw2,bh2); ctx.restore();
+        if(ir>cr){dw=cw;dh=cw/ir}else{dh=ch;dw=ch*ir}
+        ctx.save(); ctx.translate(cw/2+tx,ch/2+ty); ctx.scale(scale,scale); ctx.drawImage(img,-dw/2,-dh/2,dw,dh); ctx.restore();
+        if(talking()){
+          var w=scriptWords(),idx=Math.min(w.length-1,Math.floor(p*w.length)),st=Math.max(0,Math.floor(idx/6)*6),line=w.slice(st,st+6).join(' ');
+          ctx.font='700 '+Math.round(ch*0.028)+'px Manrope, sans-serif'; ctx.textAlign='center';
+          var tw=ctx.measureText(line).width,bw=tw+56,bh=ch*0.075,bx=(cw-bw)/2,by=ch-bh-ch*0.07;
+          ctx.fillStyle='rgba(0,0,0,.78)'; ctx.beginPath(); if(ctx.roundRect)ctx.roundRect(bx,by,bw,bh,14); else ctx.rect(bx,by,bw,bh); ctx.fill();
+          ctx.fillStyle='#fff'; ctx.textBaseline='middle'; ctx.fillText(line,cw/2,by+bh/2);
+        }
+        $('recStatus').textContent='● RECORDING '+Math.round(p*100)+'% — tab band na karo';
+        if(p<1&&!cancelled)requestAnimationFrame(draw);
+      }
+      rec.onstop=function(){
+        state.recording=false; $('downloadBtn').disabled=false; $('cancelRecBtn').style.display='none'; $('recStatus').textContent='';
+        if(cancelled){toast('Recording rok di gayi');return}
+        var blob=new Blob(chunks,{type:'video/webm'});
+        var aEl=document.createElement('a'); aEl.href=URL.createObjectURL(blob);
+        aEl.download=state.asset.name.replace(/\s+/g,'-').toLowerCase()+'-'+state.duration+'s-'+ratioInfo().label.replace(':','x')+'-'+ratioInfo().w+'x'+ratioInfo().h+'.webm';
+        document.body.appendChild(aEl); aEl.click(); aEl.remove();
+        toast('Download shuru — '+(blob.size/1048576).toFixed(1)+' MB ki video');
+      };
+      draw(); rec.start(250);
+    };
+    img.onerror=function(){toast('Image load nahi hui — dobara try karo')};
+    img.src=state.asset.src;
+  }
+
+  /* ---------- Init ---------- */
+  setRatio('16-9',false);
+  updateSpec(); updateCounts(); renderLibrary(); renderGestureTrack();
+})();
+</script>
+</body>
+</html>
