@@ -450,7 +450,7 @@ body.dragging .drophint{display:grid}
           <div class="et">Start creating or drop media</div>
           <p style="color:var(--muted);font-size:13.5px;max-width:430px">Type in the composer below, drop an image anywhere on this canvas, or open a tool — storyboard, automotive, editor and more — from the sidebar.</p>
         </div>
-        <div class="notice" id="hfTokenNotice" style="display:none;margin-bottom:16px"><strong>Hugging Face token needed.</strong> Real image &amp; video generation runs on Hugging Face models (FLUX, Wan, LTX and more). Add your free Hugging Face access token to start generating — nothing is faked here. <button class="btn small primary" id="btnHfGoSettings" style="margin-left:8px">Open Settings</button></div>
+        <div class="notice" id="hfTokenNotice" style="display:none;margin-bottom:16px"><strong>Hugging Face token needed.</strong> Real image &amp; video generation runs on Hugging Face models (Wan, LTX, Stable Diffusion and more). Add your free Hugging Face access token to start generating — nothing is faked here. Note: this account currently has <strong>no Inference Provider credits</strong> (402 Payment Required, verified 22 November 2026), so generation will show “Needs credits” until credits are bought or PRO is subscribed — full status in Settings. <button class="btn small primary" id="btnHfGoSettings" style="margin-left:8px">Open Settings</button></div>
         <div class="mgrid" id="mediaGrid"></div>
       </section>
 
@@ -612,7 +612,7 @@ body.dragging .drophint{display:grid}
         <button class="toolback" data-back>← Back to canvas</button>
         <div class="sectionhead">
           <h2>Image Generator</h2>
-          <p>Write a prompt, pick a Hugging Face image model, and generate real images — each variation is rendered by the model and saved to All media. FLUX.1-schnell is fastest, FLUX.1-dev is best quality, Stable Diffusion 3.5 Large is the versatile alternative. Without a Hugging Face token (Settings) generation can’t run — you can still preview the variation prompts.</p>
+          <p>Write a prompt and generate real images — each variation is rendered by the model and saved to All media. On the hf-inference provider, FLUX.1-schnell and FLUX.1-dev have been discontinued; the only image model it still serves is <strong>Stable Diffusion 3 Medium</strong>, so that is the model used here. Generation also needs Inference Provider credits: this account currently has none (402 Payment Required, verified 22 November 2026), so pressing Generate shows “Needs credits” until credits are bought or PRO is subscribed. Without a Hugging Face token (Settings) generation can’t run either — you can still preview the variation prompts.</p>
         </div>
         <div class="grid c2">
           <div class="card">
@@ -628,9 +628,9 @@ body.dragging .drophint{display:grid}
               <input id="imgNegative" value="blurry, distorted, watermark, extra objects, wrong proportions" /></div>
             <div class="field"><label for="imgModel">Hugging Face model</label>
               <select id="imgModel">
-                <option value="black-forest-labs/FLUX.1-schnell" selected>FLUX.1-schnell — fast</option>
-                <option value="black-forest-labs/FLUX.1-dev">FLUX.1-dev — best quality</option>
-                <option value="stabilityai/stable-diffusion-3.5-large">Stable Diffusion 3.5 Large</option>
+                <option value="stabilityai/stable-diffusion-3-medium-diffusers" selected>Stable Diffusion 3 Medium — only image model on hf-inference</option>
+                <option value="black-forest-labs/FLUX.1-schnell" disabled>FLUX.1-schnell — discontinued on hf-inference</option>
+                <option value="black-forest-labs/FLUX.1-dev" disabled>FLUX.1-dev — discontinued on hf-inference</option>
               </select></div>
             <div class="field"><label for="imgVars">Variations</label>
               <select id="imgVars"><option>2</option><option selected>4</option><option>6</option></select></div>
@@ -745,7 +745,7 @@ body.dragging .drophint{display:grid}
         <button class="toolback" data-back>← Back to canvas</button>
         <div class="sectionhead">
           <h2>YouTube Studio</h2>
-          <p>Turn the active project into a publish-ready pack: SEO title, long description, chapters timed from your scene durations, hashtags, keywords, and a thumbnail concept with its image prompt. With a Hugging Face token the writing is done by Llama 3.3 / Qwen 2.5 and the thumbnail itself is rendered by FLUX; if the AI call fails, AutoFlow says so and falls back to its built-in writer.</p>
+          <p>Turn the active project into a publish-ready pack: SEO title, long description, chapters timed from your scene durations, hashtags, keywords, and a thumbnail concept with its image prompt. With a Hugging Face token the writing is done by Llama 3.3 / Qwen 2.5 and the thumbnail itself is rendered by Stable Diffusion 3 Medium (FLUX is discontinued on hf-inference); if the AI call fails — including a 402 “Needs credits” — AutoFlow says so and falls back to its built-in writer.</p>
         </div>
         <div class="rowbtns" style="margin-bottom:16px">
           <button class="btn primary" id="btnYtGenerate">Generate YouTube pack</button>
@@ -788,13 +788,19 @@ body.dragging .drophint{display:grid}
         <button class="toolback" data-back>← Back to canvas</button>
         <div class="sectionhead">
           <h2>Settings &amp; Providers</h2>
-          <p>Generation runs on <strong>Hugging Face Inference Providers</strong> — real FLUX image models, Wan / LTX / Hunyuan / CogVideoX video models, Kokoro voices and Llama / Qwen text models, all called directly from your browser with your own Hugging Face token. The token is stored only in this browser (localStorage), never in this file and never sent anywhere except Hugging Face. Inference Providers are pay-as-you-go, and Hugging Face PRO includes monthly credits.</p>
+          <p>Generation runs on <strong>Hugging Face Inference Providers</strong> — real image models (Stable Diffusion 3 Medium on hf-inference), Wan / LTX / Hunyuan / CogVideoX video models, Kokoro voices and Llama / Qwen text models, all called directly from your browser with your own Hugging Face token. The token is stored only in this browser (localStorage), never in this file and never sent anywhere except Hugging Face. Inference Providers are pay-as-you-go, and Hugging Face PRO includes monthly credits. <strong style="color:var(--red)">Credit status: this account currently has no Inference Provider credits — see the red status box in the Hugging Face card below.</strong></p>
         </div>
         <div class="grid c2">
           <div style="display:flex;flex-direction:column;gap:16px">
             <div class="card" id="hfCard">
               <h3>Hugging Face — generation provider <span class="tag red" id="hfTag" style="margin-left:6px">No token</span></h3>
-              <p style="color:var(--muted);font-size:13.5px;margin-bottom:12px">One token powers everything: images (FLUX.1, Stable Diffusion 3.5), video (Wan, LTX-Video, HunyuanVideo, CogVideoX), character voices (Kokoro) and AI-written storyboards &amp; YouTube packs (Llama 3.3 / Qwen 2.5). Get a free token at <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener">huggingface.co/settings/tokens</a> (a “Read” token works; Inference Providers billing or PRO credits cover the calls).</p>
+              <p style="color:var(--muted);font-size:13.5px;margin-bottom:12px">One token powers everything: images (Stable Diffusion 3 Medium — the only image model the hf-inference provider still serves), video (Wan, LTX-Video, HunyuanVideo, CogVideoX), character voices (Kokoro) and AI-written storyboards &amp; YouTube packs (Llama 3.3 / Qwen 2.5). Get a free token at <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener">huggingface.co/settings/tokens</a> (a “Read” token works; Inference Providers billing or PRO credits cover the calls).</p>
+              <div class="notice red" id="hfCreditBox" style="margin-bottom:14px">
+                <strong id="hfCreditTitle">Needs credits — no Inference Provider credits on this account</strong>
+                <div id="hfCreditBody" style="margin-top:6px;line-height:1.55">Verified 22 November 2026: this Hugging Face account has <strong>no Inference Provider credits</strong>. Every test generation call was answered with <span class="mono">402 Payment Required</span>. Image and video generation <strong>cannot run</strong> until pre-paid Inference Provider credits are bought (Hugging Face → Settings → Billing) or a Hugging Face PRO subscription is active. Until then, pressing Generate shows a clear <strong>“Needs credits”</strong> message and records it in the render queue — nothing is ever faked.</div>
+                <div class="rowbtns" style="margin-top:10px"><button class="btn small" id="btnHfCreditsRecheck">I’ve added credits — clear this status</button></div>
+                <div class="hint" style="margin-top:8px">Clearing only resets the warning: the next Generate press makes a real call, and if credits are still missing Hugging Face answers 402 again and the status returns.</div>
+              </div>
               <div class="field">
                 <label for="hfTokenInput">Hugging Face access token</label>
                 <div class="tokenrow">
@@ -809,7 +815,8 @@ body.dragging .drophint{display:grid}
               <div class="divider"></div>
               <h3 style="font-size:14.5px">Model status</h3>
               <div id="hfModelStatus"></div>
-              <p style="color:var(--muted);font-size:12.5px;margin-top:10px">Credits: Hugging Face Inference Providers are pay-as-you-go per call; PRO subscribers get included monthly credits. First calls to a model can take a minute while it warms up — AutoFlow waits and shows progress.</p>
+              <p style="color:var(--muted);font-size:12.5px;margin-top:10px"><strong style="color:var(--ink2)">Provider availability (verified 22 November 2026):</strong> <span class="mono">FLUX.1-schnell</span> and <span class="mono">FLUX.1-dev</span> have been <strong style="color:var(--red)">discontinued on the hf-inference provider</strong> and can no longer be called there. The only image model that provider still serves is <span class="mono">stabilityai/stable-diffusion-3-medium-diffusers</span> — it is now AutoFlow’s default image model everywhere.</p>
+              <p style="color:var(--muted);font-size:12.5px;margin-top:10px">Credits: Hugging Face Inference Providers are pay-as-you-go per call; PRO subscribers get included monthly credits. This account currently has <strong style="color:var(--red)">no credits</strong> (402 Payment Required, verified 22 November 2026), so generation stays blocked with a “Needs credits” message until credits are bought or PRO is subscribed. First calls to a model can take a minute while it warms up — AutoFlow waits and shows progress.</p>
             </div>
             <div class="card provider">
               <div class="picon"><span class="icn"><svg viewBox="0 0 24 24"><path d="M7 4.8v14.4L19 12Z"/></svg></span></div>
@@ -847,11 +854,12 @@ body.dragging .drophint{display:grid}
             <div class="card provider">
               <div class="picon"><span class="icn"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m4 18 5.5-5 3.5 3.5L17 12l3.5 3.5"/></svg></span></div>
               <div style="flex:1">
-                <h3>Image generation <span class="tag green" style="margin-left:6px">Hugging Face</span></h3>
-                <p style="color:var(--muted);font-size:13.5px">Scene stills, Image Generator variations and thumbnails are rendered by FLUX.1-schnell / FLUX.1-dev / Stable Diffusion 3.5 Large on Hugging Face when a token is set.</p>
+                <h3>Image generation <span class="tag red" style="margin-left:6px">Needs credits</span></h3>
+                <p style="color:var(--muted);font-size:13.5px">Scene stills, Image Generator variations and thumbnails are rendered on Hugging Face when a token is set. FLUX.1-schnell and FLUX.1-dev are discontinued on the hf-inference provider; the only image model it still serves is Stable Diffusion 3 Medium. Generation also needs Inference Provider credits — this account has none (402 Payment Required, verified 22 November 2026), so image generation currently shows “Needs credits”.</p>
                 <dl class="kv" style="margin-top:10px">
                   <dt>Token needed</dt><dd class="mono">Hugging Face access token — set it in the Hugging Face card above (stored only in this browser)</dd>
-                  <dt>Models</dt><dd class="mono">FLUX.1-schnell · FLUX.1-dev · stable-diffusion-3.5-large</dd>
+                  <dt>Credits</dt><dd>None on this account — buy Inference Provider credits or subscribe to PRO</dd>
+                  <dt>Models</dt><dd class="mono">stabilityai/stable-diffusion-3-medium-diffusers (only image model on hf-inference) · FLUX.1-schnell / FLUX.1-dev — discontinued on hf-inference</dd>
                 </dl>
               </div>
             </div>
@@ -1097,9 +1105,9 @@ var SHOWROOM_DEFAULT = "Modern luxury indoor showroom with polished white marble
 var GRADS = ["linear-gradient(135deg,#3a2c12,#171106)","linear-gradient(135deg,#12303a,#0a171c)","linear-gradient(135deg,#3a1220,#170a10)","linear-gradient(135deg,#1d2b16,#0d140a)","linear-gradient(135deg,#2c2140,#120e1c)","linear-gradient(135deg,#402f16,#1a1206)","linear-gradient(135deg,#14332e,#081512)","linear-gradient(135deg,#33231f,#150d0b)"];
 /* Hugging Face model catalogue (Inference Providers, router.huggingface.co) */
 var HF_IMG_MODELS = [
-  { id:"black-forest-labs/FLUX.1-schnell", name:"FLUX.1-schnell", sub:"Fast — default for images" },
-  { id:"black-forest-labs/FLUX.1-dev", name:"FLUX.1-dev", sub:"Best quality" },
-  { id:"stabilityai/stable-diffusion-3.5-large", name:"Stable Diffusion 3.5 Large", sub:"Versatile alternative" }
+  { id:"stabilityai/stable-diffusion-3-medium-diffusers", name:"Stable Diffusion 3 Medium", sub:"Only image model still served by hf-inference — default" },
+  { id:"black-forest-labs/FLUX.1-schnell", name:"FLUX.1-schnell", sub:"Discontinued on the hf-inference provider", dead:true },
+  { id:"black-forest-labs/FLUX.1-dev", name:"FLUX.1-dev", sub:"Discontinued on the hf-inference provider", dead:true }
 ];
 var HF_T2V_MODELS = [
   { id:"Wan-AI/Wan2.1-T2V-14B", name:"Wan 2.1 T2V 14B", sub:"Default text-to-video" },
@@ -1299,6 +1307,42 @@ function hfRequireToken(what){
   goto("settings");
   return false;
 }
+/* --- Credit status ---------------------------------------------------
+   Verified 22 November 2026: the connected Hugging Face account has NO
+   Inference Provider credits — every generation test call returned
+   402 Payment Required. Generation cannot run until pre-paid credits
+   are bought or PRO is subscribed. The state lives in localStorage:
+   "none" (402 seen / verified), "ok" (a real call succeeded since),
+   "unknown" (user cleared the status after adding credits — the next
+   real call decides). A 402 anywhere flips it back to "none". */
+var HF_CREDITS_KEY = "autoflow_hf_credits_v1";
+var HF_CREDITS_VERIFIED_AT = new Date(2026, 10, 22).getTime(); /* 22 November 2026 */
+var HF_CREDITS_MSG = "Needs credits — this Hugging Face account has no Inference Provider credits (402 Payment Required, verified 22 November 2026). Buy pre-paid credits or subscribe to Hugging Face PRO, then generate again. Nothing was generated.";
+function hfCreditState(){
+  try{ var s = JSON.parse(localStorage.getItem(HF_CREDITS_KEY) || "null"); if(s && s.status) return s; }catch(e){}
+  return { status:"none", at: HF_CREDITS_VERIFIED_AT, source:"verified" };
+}
+function hfSetCreditState(status){
+  try{ localStorage.setItem(HF_CREDITS_KEY, JSON.stringify({ status: status, at: Date.now() })); }catch(e){}
+  refreshHfUI();
+}
+function hfNeedsCredits(){ return hfCreditState().status === "none"; }
+function hfIsCreditsErr(e){ return !!e && String(e.message || e) === "NEEDS_CREDITS"; }
+function hfRecordNeedsCredits(title, type, projectName){
+  if(!state) return;
+  state.renders.unshift({ id: uid(), title: title, type: type, project: projectName || "—", status: "Needs credits", at: Date.now(),
+    brief: "Blocked before generation: this Hugging Face account has no Inference Provider credits — Hugging Face answers 402 Payment Required (verified 22 November 2026). Buy pre-paid Inference Provider credits or subscribe to Hugging Face PRO, then press Generate again. Nothing was generated and nothing was faked." });
+  save(); refreshChrome();
+}
+/* Gate for every Generate press: known-missing credits stop the call
+   before it is even sent, with a clear "Needs credits" message. */
+function hfRequireCredits(what, title, type, projectName){
+  if(!hfNeedsCredits()) return true;
+  hfRecordNeedsCredits(title || ("Generate: " + what), type || "Generation", projectName);
+  toast(HF_CREDITS_MSG);
+  goto("settings");
+  return false;
+}
 /* --- progress panel (real progress only: warm-up waits + polling) --- */
 function hfProgShow(title){
   hfJob.cancelled = false;
@@ -1342,7 +1386,8 @@ async function hfGenerateImage(modelId, prompt, negative){
     hfJob.controller = ("AbortController" in window) ? new AbortController() : null;
     var res = await fetch(hfModelUrl(modelId), { method:"POST", headers: hfHeaders({"Content-Type":"application/json"}), body: JSON.stringify(body), signal: hfJob.controller ? hfJob.controller.signal : undefined });
     var ct = res.headers.get("content-type") || "";
-    if(res.ok && ct.indexOf("image") === 0){ return await res.blob(); }
+    if(res.ok && ct.indexOf("image") === 0){ hfSetCreditState("ok"); return await res.blob(); }
+    if(res.status === 402){ hfSetCreditState("none"); throw new Error("NEEDS_CREDITS"); }
     if(res.status === 503 || res.status === 202){
       var waitS = 8;
       try{ var j = await res.json(); if(j.estimated_time) waitS = Math.min(30, Math.max(4, j.estimated_time)); }catch(e){}
@@ -1350,6 +1395,7 @@ async function hfGenerateImage(modelId, prompt, negative){
       await hfSleep(waitS * 1000); continue;
     }
     lastErr = "Hugging Face " + res.status + ": " + (await hfErrText(res));
+    if(/payment required/i.test(lastErr)){ hfSetCreditState("none"); throw new Error("NEEDS_CREDITS"); }
     throw new Error(lastErr);
   }
   throw new Error("The image model did not warm up in time — try again in a moment. " + lastErr);
@@ -1374,12 +1420,13 @@ async function hfGenerateVideo(modelId, prompt, imageDataUrl){
     var elapsed = (Date.now() - started) / 1000;
     if(res.ok && (ct.indexOf("video") === 0 || ct.indexOf("application/octet-stream") === 0)){
       var blob = await res.blob();
-      if(blob.size > 0) return { blob: blob, url: "" };
+      if(blob.size > 0){ hfSetCreditState("ok"); return { blob: blob, url: "" }; }
     }
+    if(res.status === 402){ hfSetCreditState("none"); throw new Error("NEEDS_CREDITS"); }
     if(res.ok && ct.indexOf("application/json") === 0){
       var j = null; try{ j = await res.json(); }catch(e){}
       var u = hfFindUrl(j, 0);
-      if(u) return { blob: null, url: u };
+      if(u){ hfSetCreditState("ok"); return { blob: null, url: u }; }
       /* JSON without a URL yet (queued task) — keep polling */
       hfProgUpdate(Math.min(92, 10 + elapsed/1.4), "Generation queued on Hugging Face — polling for the video URL… (" + Math.round(elapsed) + "s)");
       await hfSleep(6000); continue;
@@ -1390,7 +1437,9 @@ async function hfGenerateVideo(modelId, prompt, imageDataUrl){
       hfProgUpdate(Math.min(92, 10 + elapsed/1.4), (res.status===503 ? "Model is warming up" : "Request accepted — generating") + " on Hugging Face… polling again in " + Math.round(waitS2) + "s (" + Math.round(elapsed) + "s elapsed)");
       await hfSleep(waitS2 * 1000); continue;
     }
-    throw new Error("Hugging Face " + res.status + ": " + (await hfErrText(res)));
+    var vErr = "Hugging Face " + res.status + ": " + (await hfErrText(res));
+    if(/payment required/i.test(vErr)){ hfSetCreditState("none"); throw new Error("NEEDS_CREDITS"); }
+    throw new Error(vErr);
   }
   throw new Error("Video generation timed out while polling Hugging Face — the model may be busy; try again or pick LTX-Video.");
 }
@@ -1402,10 +1451,11 @@ async function hfGenerateSpeech(text){
     try{
       var res = await fetch(hfModelUrl(HF_TTS_MODELS[i]), { method:"POST", headers: hfHeaders({"Content-Type":"application/json"}), body: JSON.stringify({ inputs: text }) });
       var ct = res.headers.get("content-type") || "";
-      if(res.ok && ct.indexOf("json") < 0){ var b = await res.blob(); if(b.size > 100) return { blob: b, model: HF_TTS_MODELS[i] }; }
+      if(res.ok && ct.indexOf("json") < 0){ var b = await res.blob(); if(b.size > 100){ hfSetCreditState("ok"); return { blob: b, model: HF_TTS_MODELS[i] }; } }
       errors.push(HF_TTS_MODELS[i] + " → " + res.status + " " + (await hfErrText(res)));
     }catch(e){ errors.push(HF_TTS_MODELS[i] + " → " + e.message); }
   }
+  if(errors.some(function(x){ return /→ 402|payment required/i.test(x); })){ hfSetCreditState("none"); throw new Error("NEEDS_CREDITS"); }
   throw new Error(errors.join(" · "));
 }
 var hfAudioEl = null;
@@ -1428,7 +1478,8 @@ async function speakSmart(text, opts){
       if(opts.onAudio) opts.onAudio(lastVoiceUrl, r.model);
       return;
     }catch(e){
-      toast("Hugging Face voice failed (" + String(e.message).slice(0,90) + ") — falling back to device voice");
+      if(hfIsCreditsErr(e)) toast("Needs credits — the Hugging Face voice needs Inference Provider credits (402 Payment Required), so the device voice is used instead. See Settings.");
+      else toast("Hugging Face voice failed (" + String(e.message).slice(0,90) + ") — falling back to device voice");
     }
   }
   speakText(text, opts);
@@ -1444,10 +1495,11 @@ async function hfChat(systemPrompt, userPrompt){
       if(!res.ok){ errors.push(HF_CHAT_MODELS[i] + " → " + res.status + " " + (await hfErrText(res))); continue; }
       var j = await res.json();
       var content = j && j.choices && j.choices[0] && j.choices[0].message ? j.choices[0].message.content : "";
-      if(content) return { text: content, model: HF_CHAT_MODELS[i] };
+      if(content){ hfSetCreditState("ok"); return { text: content, model: HF_CHAT_MODELS[i] }; }
       errors.push(HF_CHAT_MODELS[i] + " → empty reply");
     }catch(e){ errors.push(HF_CHAT_MODELS[i] + " → " + e.message); }
   }
+  if(errors.some(function(x){ return /→ 402|payment required/i.test(x); })){ hfSetCreditState("none"); throw new Error("NEEDS_CREDITS"); }
   throw new Error(errors.join(" · "));
 }
 function hfParseJson(text){
@@ -1465,34 +1517,79 @@ function hfSetTestResult(ok, msg){
 function renderHfModelStatus(){
   var el = $("hfModelStatus"); if(!el) return;
   var has = hfHasToken();
+  var noCred = hfNeedsCredits();
   var rows = [];
-  HF_IMG_MODELS.forEach(function(m){ rows.push({ t:"Image", id: m.id }); });
+  HF_IMG_MODELS.forEach(function(m){ rows.push({ t:"Image", id: m.id, dead: !!m.dead }); });
   HF_T2V_MODELS.forEach(function(m){ rows.push({ t:"Text-to-video", id: m.id }); });
   rows.push({ t:"Image-to-video", id:"Wan-AI/Wan2.2-I2V-A14B" });
   HF_TTS_MODELS.forEach(function(m, i){ rows.push({ t:"Voice" + (i===0 ? "" : " (fallback)"), id: m }); });
   HF_CHAT_MODELS.forEach(function(m, i){ rows.push({ t:"Text / storyboard" + (i===0 ? "" : " (fallback)"), id: m }); });
   el.innerHTML = rows.map(function(r){
-    return '<div class="hfstat"><span class="dot ' + (has ? "on" : "off") + '"></span><span class="hm">' + esc(r.t) + '<div class="mid">' + esc(r.id) + '</div></span><span class="hs">' + (has ? "Ready — token set" : "Needs token") + '</span></div>';
+    var st, dot;
+    if(r.dead){ st = "Discontinued on hf-inference"; dot = "off"; }
+    else if(!has){ st = "Needs token"; dot = "off"; }
+    else if(noCred){ st = "Needs credits"; dot = "off"; }
+    else { st = "Ready — token set"; dot = "on"; }
+    return '<div class="hfstat"><span class="dot ' + dot + '"></span><span class="hm">' + esc(r.t) + '<div class="mid">' + esc(r.id) + '</div></span><span class="hs">' + st + '</span></div>';
   }).join("");
 }
 function refreshHfUI(){
   var has = hfHasToken();
+  var cred = hfCreditState();
+  var noCred = cred.status === "none";
   var tag = $("hfTag");
-  if(tag){ tag.textContent = has ? "Connected" : "No token"; tag.className = "tag " + (has ? "green" : "red"); tag.style.marginLeft = "6px"; }
+  if(tag){
+    tag.textContent = !has ? "No token" : (noCred ? "Needs credits" : "Connected");
+    tag.className = "tag " + (!has || noCred ? "red" : "green"); tag.style.marginLeft = "6px";
+  }
   var sl = $("hfStatusLine");
-  if(sl) sl.textContent = has ? "Token saved in this browser — generation is live on Hugging Face models." : "No token saved yet — generation buttons will ask for one.";
+  if(sl) sl.textContent = !has
+    ? "No token saved yet — generation buttons will ask for one."
+    : (noCred
+      ? "Token saved in this browser — but this account has no Inference Provider credits (402 Payment Required), so generation shows “Needs credits” until credits are bought or PRO is subscribed."
+      : "Token saved in this browser — generation is live on Hugging Face models.");
   var tr = $("hfTestResult"), lt = hfLastTest();
   if(tr) tr.textContent = lt ? ("Last test " + fmtDate(lt.at) + ": " + lt.msg) : "Not tested yet — press “Test connection”.";
   var inp = $("hfTokenInput");
   if(inp && document.activeElement !== inp) inp.value = hfToken();
+  /* Credit status banner in the Settings HF card */
+  var cbox = $("hfCreditBox"), ct = $("hfCreditTitle"), cb = $("hfCreditBody"), crb = $("btnHfCreditsRecheck");
+  if(cbox && ct && cb){
+    if(noCred){
+      cbox.className = "notice red"; cbox.style.marginBottom = "14px";
+      ct.textContent = "Needs credits — no Inference Provider credits on this account";
+      cb.innerHTML = "Verified 22 November 2026: this Hugging Face account has <strong>no Inference Provider credits</strong>. Every test generation call was answered with <span class=\"mono\">402 Payment Required</span>. Image and video generation <strong>cannot run</strong> until pre-paid Inference Provider credits are bought (Hugging Face → Settings → Billing) or a Hugging Face PRO subscription is active. Until then, pressing Generate shows a clear <strong>“Needs credits”</strong> message and records it in the render queue — nothing is ever faked."
+        + (cred.at && cred.at !== HF_CREDITS_VERIFIED_AT ? "<br>Last 402 seen: " + fmtDate(cred.at) + "." : "");
+      if(crb) crb.style.display = "";
+    } else if(cred.status === "ok"){
+      cbox.className = "notice"; cbox.style.marginBottom = "14px";
+      cbox.style.borderColor = "rgba(123,196,127,.4)"; cbox.style.background = "rgba(123,196,127,.06)";
+      ct.textContent = "Credits working — a generation call succeeded on " + fmtDate(cred.at);
+      ct.style.color = "var(--green)";
+      cb.innerHTML = "Inference Provider credits are active on this account — the last real generation call went through. (Earlier verified check, 22 November 2026, found no credits and 402 Payment Required on every call.)";
+      if(crb) crb.style.display = "none";
+    } else {
+      cbox.className = "notice"; cbox.style.marginBottom = "14px";
+      cbox.style.borderColor = ""; cbox.style.background = "";
+      ct.textContent = "Credit status cleared — not yet re-verified";
+      ct.style.color = "";
+      cb.innerHTML = "You cleared the “Needs credits” status. The last verified check (22 November 2026) found <strong>no credits</strong> — every call returned <span class=\"mono\">402 Payment Required</span>. Press Generate anywhere in the studio: if credits are still missing, Hugging Face answers 402 and the “Needs credits” status comes straight back.";
+      if(crb) crb.style.display = "none";
+    }
+    if(noCred || cred.status !== "ok"){ cbox.style.borderColor = ""; cbox.style.background = ""; if(ct) ct.style.color = ""; }
+  }
   var note = $("hfSideNote");
-  if(note) note.innerHTML = has
-    ? '<span style="color:var(--green)">●</span> Hugging Face <strong style="color:var(--ink2)">connected</strong> — images, video, voices &amp; text run on HF models.'
-    : '<span style="color:var(--red)">●</span> Hugging Face not connected — add your token in <strong style="color:var(--ink2)">Settings</strong> to generate real images &amp; videos.';
+  if(note) note.innerHTML = !has
+    ? '<span style="color:var(--red)">●</span> Hugging Face not connected — add your token in <strong style="color:var(--ink2)">Settings</strong> to generate real images &amp; videos.'
+    : (noCred
+      ? '<span style="color:var(--red)">●</span> Hugging Face connected, but <strong style="color:var(--ink2)">Needs credits</strong> — no Inference Provider credits (402). See <strong style="color:var(--ink2)">Settings</strong>.'
+      : '<span style="color:var(--green)">●</span> Hugging Face <strong style="color:var(--ink2)">connected</strong> — images, video, voices &amp; text run on HF models.');
   var cn = $("composerNote");
-  if(cn) cn.textContent = has
-    ? "Hugging Face connected — the composer generates real images & videos with FLUX, Wan, LTX and more. First calls can take a minute while a model warms up."
-    : "Add your Hugging Face token in Settings to generate real images & videos — no token, no generation, nothing faked.";
+  if(cn) cn.textContent = !has
+    ? "Add your Hugging Face token in Settings to generate real images & videos — no token, no generation, nothing faked."
+    : (noCred
+      ? "Needs credits — this Hugging Face account has no Inference Provider credits (402 Payment Required, verified 22 November 2026). Generation won't run until credits are bought or PRO is subscribed — see Settings."
+      : "Hugging Face connected — the composer generates real images & videos with Stable Diffusion 3 Medium, Wan, LTX and more. First calls can take a minute while a model warms up.");
   var veh = $("voEngineHint");
   if(veh) veh.textContent = has
     ? "Voice engine: Hugging Face Kokoro-82M (SpeechT5 fallback) — generated audio can be played and downloaded below."
@@ -1523,6 +1620,10 @@ $("btnHfTest").addEventListener("click", async function(){
   refreshHfUI();
 });
 $("btnHfGoSettings").addEventListener("click", function(){ goto("settings"); });
+$("btnHfCreditsRecheck").addEventListener("click", function(){
+  hfSetCreditState("unknown");
+  toast("Credit status cleared — press Generate anywhere: the next real call decides. If credits are still missing, Hugging Face answers 402 and “Needs credits” returns.");
+});
 
 /* ---------------- Navigation ---------------- */
 var NAV_VIEWS = ["media","characters","scenes","library","tools","bin"];
@@ -1903,6 +2004,8 @@ function bindSceneCards(root, project, rerender){
       b.addEventListener("click", async function(){
         var kind = b.dataset.sgen;
         if(!hfRequireToken(kind==="img" ? "generate scene images" : "generate scene videos")) return;
+        if(!hfRequireCredits(kind==="img" ? "generate scene images" : "generate scene videos",
+          "Scene " + s.n + (kind==="img" ? " image: " : " video: ") + s.title, kind==="img" ? "Text-to-Image" : "Text-to-Video", project.name)) return;
         b.disabled = true;
         try{
           if(kind==="img"){
@@ -1930,7 +2033,12 @@ function bindSceneCards(root, project, rerender){
           }
           touch(project); save(); refreshChrome(); rerender(true);
         }catch(e){
-          toast(String(e.message) === "Cancelled" ? "Generation cancelled" : "Hugging Face generation failed: " + String(e.message).slice(0,140));
+          if(hfIsCreditsErr(e)){
+            hfRecordNeedsCredits("Scene " + s.n + (kind==="img" ? " image: " : " video: ") + s.title, kind==="img" ? "Text-to-Image" : "Text-to-Video", project.name);
+            toast(HF_CREDITS_MSG);
+            goto("settings");
+          }
+          else toast(String(e.message) === "Cancelled" ? "Generation cancelled" : "Hugging Face generation failed: " + String(e.message).slice(0,140));
         }finally{ hfProgHide(); b.disabled = false; }
       });
     });
@@ -1995,7 +2103,7 @@ var TOOLS = [
   { view:"templates", name:"Templates", desc:"Proven structures — launch films, product stories, presenter explainers, travel films.", icon:'<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>' },
   { view:"settings", name:"Settings & Providers", desc:"Hugging Face token, per-model status, the generation queue, and backups.", icon:'<circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/>' }
 ];
-var WF = [["1","Enter topic","Type the idea, product or car."],["2","Select style","Camera, lighting, cinematic style."],["3","Generate storyboard","A scene-by-scene plan, written locally."],["4","Review & edit scenes","Edit, regenerate, reorder scenes."],["5","Generate images","Real renders on Hugging Face FLUX models."],["6","Generate videos","Real renders on Hugging Face Wan / LTX / Hunyuan models."],["7","Generate voiceover","Character speaks its own script (HF Kokoro, device-voice fallback)."],["8","Arrange in editor","Multi-track timeline, trim & split."],["9","Export","WebM timeline export, or full render via provider."]];
+var WF = [["1","Enter topic","Type the idea, product or car."],["2","Select style","Camera, lighting, cinematic style."],["3","Generate storyboard","A scene-by-scene plan, written locally."],["4","Review & edit scenes","Edit, regenerate, reorder scenes."],["5","Generate images","Real renders on Hugging Face Stable Diffusion 3 Medium."],["6","Generate videos","Real renders on Hugging Face Wan / LTX / Hunyuan models."],["7","Generate voiceover","Character speaks its own script (HF Kokoro, device-voice fallback)."],["8","Arrange in editor","Multi-track timeline, trim & split."],["9","Export","WebM timeline export, or full render via provider."]];
 function renderTools(){
   $("toolGrid").innerHTML = TOOLS.map(function(t){
     return '<button class="tooltile" data-tool="'+t.view+'"><span class="tic"><span class="icn"><svg viewBox="0 0 24 24">'+t.icon+'</svg></span></span><h3>'+t.name+'</h3><p>'+t.desc+'</p></button>';
@@ -2042,7 +2150,7 @@ $("btnBinEmpty").addEventListener("click", function(){
 });
 
 /* ---------------- Composer ---------------- */
-var cs = { mode:"video", source:"frames", videoModel:"Wan-AI/Wan2.1-T2V-14B", i2vModel:"Wan-AI/Wan2.2-I2V-A14B", imageModel:"black-forest-labs/FLUX.1-schnell", res:"720p", dur:8, ratio:"16:9", count:1 };
+var cs = { mode:"video", source:"frames", videoModel:"Wan-AI/Wan2.1-T2V-14B", i2vModel:"Wan-AI/Wan2.2-I2V-A14B", imageModel:"stabilityai/stable-diffusion-3-medium-diffusers", res:"720p", dur:8, ratio:"16:9", count:1 };
 var selectedVoice = null; /* VOICES entry or null */
 var composerImage = "";   /* attached first-frame / ingredient image (data URL) */
 function hfShortName(id){ return String(id || "").split("/").pop(); }
@@ -2103,15 +2211,18 @@ function renderModelPop(){
   var current = cs.mode==="video" ? (isI2V ? cs.i2vModel : cs.videoModel) : cs.imageModel;
   $("mpModels").innerHTML = (isI2V ? '<div class="hint" style="padding:2px 12px 6px">An image is attached — it becomes the first frame (image-to-video models).</div>' : "")
     + models.map(function(m){
-    return '<button class="mp-model'+(m.id===current?" on":"")+'" data-model="'+esc(m.id)+'">'+esc(m.name)+(m.sub?'<span class="sub" style="color:var(--muted)">'+esc(m.sub)+'</span>':'')+'<span class="sub" style="color:var(--faint)">'+esc(m.id)+'</span></button>';
+    return '<button class="mp-model'+(m.id===current?" on":"")+'" data-model="'+esc(m.id)+'"' + (m.dead ? ' disabled title="Discontinued on the hf-inference provider — it can no longer be called there"' : '') + '>'+esc(m.name)+(m.sub?'<span class="sub" style="color:'+(m.dead?'var(--red)':'var(--muted)')+'">'+esc(m.sub)+'</span>':'')+'<span class="sub" style="color:var(--faint)">'+esc(m.id)+'</span></button>';
   }).join("");
   $("mpModels").querySelectorAll("[data-model]").forEach(function(b){ b.addEventListener("click", function(){
+    if(b.disabled) return;
     if(cs.mode==="video"){ if(isI2V) cs.i2vModel = b.dataset.model; else cs.videoModel = b.dataset.model; } else cs.imageModel = b.dataset.model;
     renderModelPop(); refreshChip();
   }); });
-  $("mpCredits").innerHTML = hfHasToken()
-    ? "Hugging Face <strong style='color:var(--green)'>connected</strong> — generation runs on the selected HF model via Inference Providers (pay-as-you-go / PRO credits)."
-    : "Hugging Face token <strong>needed</strong> — add it in <strong>Settings</strong> to generate. No token, no generation, nothing faked.";
+  $("mpCredits").innerHTML = !hfHasToken()
+    ? "Hugging Face token <strong>needed</strong> — add it in <strong>Settings</strong> to generate. No token, no generation, nothing faked."
+    : (hfNeedsCredits()
+      ? "<strong style='color:var(--red)'>Needs credits</strong> — this Hugging Face account has no Inference Provider credits (402 Payment Required, verified 22 November 2026). Generation won't run until credits are bought or PRO is subscribed — see <strong>Settings</strong>."
+      : "Hugging Face <strong style='color:var(--green)'>connected</strong> — generation runs on the selected HF model via Inference Providers (pay-as-you-go / PRO credits).");
 }
 $("mpTabImage").addEventListener("click", function(){ cs.mode = "image"; renderModelPop(); refreshChip(); });
 $("mpTabVideo").addEventListener("click", function(){ cs.mode = "video"; renderModelPop(); refreshChip(); });
@@ -2128,6 +2239,9 @@ $("btnSend").addEventListener("click", async function(){
   var prompt = $("composerInput").value.trim();
   if(!prompt && !composerImage){ toast("Describe what you want to create — or attach an image with +"); return; }
   if(!hfRequireToken(cs.mode==="video" ? "generate videos" : "generate images")) return;
+  if(!hfRequireCredits(cs.mode==="video" ? "generate videos" : "generate images",
+    (cs.mode==="video" ? "Video" : "Image") + ": " + (prompt || "from attached image").slice(0,60) + "…",
+    cs.mode==="video" ? "Text-to-Video" : "Text-to-Image", p.name)) return;
   if(!prompt) prompt = cs.source==="ingredients" ? "Video built from the attached ingredient image" : "Video from the attached first frame";
   var script = $("composerScript").value.trim();
   var btn = this; btn.disabled = true;
@@ -2174,6 +2288,11 @@ $("btnSend").addEventListener("click", async function(){
     $("composerInput").value = ""; autoGrow($("composerInput")); updateSendState();
   }catch(e){
     if(String(e.message) === "Cancelled"){ toast("Generation cancelled"); }
+    else if(hfIsCreditsErr(e)){
+      hfRecordNeedsCredits((cs.mode==="video" ? "Video" : "Image") + ": " + prompt.slice(0,60) + "…", cs.mode==="video" ? "Text-to-Video" : "Text-to-Image", p.name);
+      toast(HF_CREDITS_MSG);
+      goto("settings");
+    }
     else {
       state.renders.unshift({ id: uid(), title: (cs.mode==="video" ? "Video" : "Image") + ": " + prompt.slice(0,60) + "…", type: cs.mode==="video" ? "Text-to-Video" : "Text-to-Image", project: p.name, status: "Failed — " + String(e.message).slice(0,80), at: Date.now(), brief: prompt });
       save(); refreshChrome();
@@ -2344,7 +2463,8 @@ $("btnSbGenerate").addEventListener("click", async function(){
     p.timeline = null; touch(p); save(); refreshChrome(); renderStoryboard();
     toast("Storyboard written by " + r.model + " — " + p.scenes.length + " scenes");
   }catch(e){
-    applyTemplate("Hugging Face text AI failed (" + String(e.message).slice(0,90) + ") — fell back to built-in templates.");
+    if(hfIsCreditsErr(e)) applyTemplate("Needs credits — Hugging Face answered 402 Payment Required (no Inference Provider credits on this account, verified 22 November 2026), so this storyboard was built with built-in templates. Buy credits or subscribe to PRO for AI-written storyboards.");
+    else applyTemplate("Hugging Face text AI failed (" + String(e.message).slice(0,90) + ") — fell back to built-in templates.");
   }finally{ hfProgHide(); btn.disabled = false; }
 });
 $("sbConcept").addEventListener("change", function(){ var p = activeProject(); if(p){ p.concept = this.value; touch(p); save(); } });
@@ -2430,6 +2550,7 @@ $("btnImgGenerate").addEventListener("click", async function(){
   var set = buildImageSet(); if(!set.length) return;
   if(!hfRequireToken("generate images")) return;
   var p = activeProject(); if(!p){ toast("Create a project first"); return; }
+  if(!hfRequireCredits("generate images", "Image Generator: " + set[0].prompt.slice(0,50) + "…", "Text-to-Image", p.name)) return;
   var modelId = $("imgModel").value, neg = $("imgNegative").value.trim();
   var btn = this; btn.disabled = true;
   var results = [];
@@ -2450,7 +2571,12 @@ $("btnImgGenerate").addEventListener("click", async function(){
     }).join("");
     toast(results.length + " images generated on Hugging Face — also saved in All media");
   }catch(e){
-    toast(String(e.message) === "Cancelled" ? "Generation cancelled" : "Hugging Face image generation failed: " + String(e.message).slice(0,140));
+    if(hfIsCreditsErr(e)){
+      hfRecordNeedsCredits("Image Generator: " + set[0].prompt.slice(0,50) + "…", "Text-to-Image", p.name);
+      toast(HF_CREDITS_MSG);
+      goto("settings");
+    }
+    else toast(String(e.message) === "Cancelled" ? "Generation cancelled" : "Hugging Face image generation failed: " + String(e.message).slice(0,140));
     if(results.length){ /* partial results stay saved in All media */ }
     else renderImgPromptSet(set);
   }finally{ hfProgHide(); btn.disabled = false; }
@@ -2721,7 +2847,8 @@ $("btnYtGenerate").addEventListener("click", async function(){
     toast("YouTube pack written by " + r.model);
   }catch(e){
     buildYtTemplatePack(p);
-    toast("Hugging Face text AI failed (" + String(e.message).slice(0,90) + ") — fell back to the built-in writer.");
+    if(hfIsCreditsErr(e)) toast("Needs credits — Hugging Face answered 402 Payment Required (no Inference Provider credits), so the pack was built with the built-in writer. See Settings.");
+    else toast("Hugging Face text AI failed (" + String(e.message).slice(0,90) + ") — fell back to the built-in writer.");
   }finally{ hfProgHide(); btn.disabled = false; }
 });
 $("btnYtThumbGen").addEventListener("click", async function(){
@@ -2729,6 +2856,7 @@ $("btnYtThumbGen").addEventListener("click", async function(){
   var prompt = $("ytThumbPrompt").value.trim();
   if(!prompt){ toast("Generate the YouTube pack first, or write a thumbnail prompt"); return; }
   if(!hfRequireToken("generate the thumbnail")) return;
+  if(!hfRequireCredits("generate the thumbnail", "YouTube thumbnail: " + p.name, "Text-to-Image", p.name)) return;
   var btn = this; btn.disabled = true;
   try{
     hfProgShow("Generating thumbnail — " + hfShortName(cs.imageModel));
@@ -2743,7 +2871,12 @@ $("btnYtThumbGen").addEventListener("click", async function(){
     hfProgUpdate(100, "Thumbnail saved to All media");
     toast("Thumbnail generated on Hugging Face — saved in All media");
   }catch(e){
-    toast(String(e.message) === "Cancelled" ? "Generation cancelled" : "Thumbnail generation failed: " + String(e.message).slice(0,140));
+    if(hfIsCreditsErr(e)){
+      hfRecordNeedsCredits("YouTube thumbnail: " + p.name, "Text-to-Image", p.name);
+      toast(HF_CREDITS_MSG);
+      goto("settings");
+    }
+    else toast(String(e.message) === "Cancelled" ? "Generation cancelled" : "Thumbnail generation failed: " + String(e.message).slice(0,140));
   }finally{ hfProgHide(); btn.disabled = false; }
 });
 $("btnYtCopyAll").addEventListener("click", function(){
