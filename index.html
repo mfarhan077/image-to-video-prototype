@@ -172,6 +172,21 @@ button{cursor:pointer}
 .fit-meter .fit-bar i.over{background:var(--amber)}
 .fit-meter .fit-actions{margin-top:9px;display:flex;gap:7px;flex-wrap:wrap}
 .script-note{margin:9px 0 0;font-size:12px;color:#8fe3b0;line-height:1.6}
+.audio-mode{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.audio-mode .mode-opt{flex:1;min-width:200px;border-radius:14px;padding:11px 13px;border:1.5px solid #2a5c40;background:#0d1a12;text-align:left}
+.audio-mode .mode-opt strong{display:block;font-size:13.5px;color:#fff}
+.audio-mode .mode-opt span{font-size:12px;color:#b9d9c4;line-height:1.5;display:block;margin-top:2px}
+.audio-mode .mode-opt.on{border-color:var(--green);background:#123324}
+.audio-mode .mode-opt.off{opacity:.62;border-style:dashed;cursor:not-allowed}
+.audio-mode .mode-opt .tag{display:inline-block;font-family:"JetBrains Mono",monospace;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;margin-bottom:6px}
+.audio-mode .mode-opt.on .tag{background:var(--green);color:#08130c}
+.audio-mode .mode-opt.off .tag{background:#3a2a10;color:#ffd97a;border:1px solid #4a3a10}
+.dialogue-bubble{position:absolute;left:50%;transform:translateX(-50%) translateY(6px);top:14%;z-index:5;max-width:82%;background:#fff;color:#111;border-radius:16px;padding:10px 14px;font-size:14.5px;font-weight:700;line-height:1.5;text-align:center;box-shadow:0 10px 28px rgba(0,0,0,.45);display:none}
+.dialogue-bubble.show{display:block;animation:bubbleIn .25s ease}
+.dialogue-bubble::after{content:"";position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);border:8px solid transparent;border-top-color:#fff;border-bottom:0}
+.dialogue-bubble .who2{display:block;font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.08em;color:#b3541e;margin-bottom:2px}
+@keyframes bubbleIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.vo-off-badge{display:inline-flex;align-items:center;background:#2b2110;border:1px solid #4a3a10;color:#ffd97a;font-family:"JetBrains Mono",monospace;font-size:10.5px;font-weight:700;padding:8px 12px;border-radius:999px}
 
 /* Advanced (band rehta hai — screen saaf rehti hai) */
 details.advanced{margin-top:16px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
@@ -304,9 +319,10 @@ footer{margin-top:32px;border-top:1px solid var(--line);padding-top:15px;color:v
         <span class="badge tr" id="resBadge">16:9 • 1920 × 1080 • HD</span>
         <span class="badge bl mono" id="tcBadge">00:00 / 00:08</span>
         <span class="badge br" id="camBadge">CAM: ZOOM IN</span>
-        <div class="lip-box" id="lipBox"><span class="lbl">LIP-SYNC</span><span class="lip-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+        <div class="lip-box" id="lipBox"><span class="lbl">CHARACTER BOL RAHA HAI • LIP-SYNC</span><span class="lip-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
         <div class="gesture-tag" id="gestureTag">✋ Hand gesture</div>
-        <div class="caption-box" id="captionBox"><span class="who">CHARACTER BOL RAHA HAI — LIVE SUBTITLES</span><span id="captionText"></span></div>
+        <div class="dialogue-bubble" id="dialogueBubble"><span class="who2">CHARACTER — CAMERA PAR BOL RAHA HAI</span><span id="dialogueText"></span></div>
+        <div class="caption-box" id="captionBox"><span class="who">CHARACTER KE APNE ALFAAZ — YE SUBTITLE HAI, VOICE-OVER NAHI</span><span id="captionText"></span></div>
         <div class="drop-overlay"><div><strong>Image yahan chhoro</strong><span>Ye image video ka frame ban jayegi</span></div></div>
         <div class="gen-overlay"><div>
           <div class="pct" id="genPct">0%</div>
@@ -318,6 +334,7 @@ footer{margin-top:32px;border-top:1px solid var(--line);padding-top:15px;color:v
     <div class="progress" aria-hidden="true"><i id="genProgress"></i></div>
     <div class="stage-meta">
       <span class="fit-badge">FIT: POORI IMAGE — NO CROP · NO STRETCH ✓</span>
+      <span class="vo-off-badge">🔇 BACKGROUND VOICE-OVER: OFF — CHARACTER KHUD BOLEGA</span>
       <span class="mono" id="stageImgMeta">KOI IMAGE SELECT NAHI</span>
     </div>
     <div class="player">
@@ -331,7 +348,7 @@ footer{margin-top:32px;border-top:1px solid var(--line);padding-top:15px;color:v
     </div>
     <div class="export-box" id="exportBox">
       <h4>✅ Video tayyar hai — <span id="exportTitle">—</span></h4>
-      <p>Neeche <strong style="color:#fff">Library</strong> mein save ho gayi hai — wahan Scene Prompt aur Script alag alag dikhte hain. Download dabao to video isi ratio/size mein render ho kar milegi (recording mein utne hi second lagein ge jitni lambi video hai). Prototype format WebM hai; production mein yehi MP4 (H.264) hoga, aur asal AI awaz + lip-sync wahan lagega. Preview ki awaaz browser ki voice hai jo sirf Script bolti hai.</p>
+      <p>Neeche <strong style="color:#fff">Library</strong> mein save ho gayi hai — wahan Scene Prompt aur Dialogue alag alag dikhte hain. Is video mein <strong style="color:#fff">koi background voice-over nahi hai</strong> — jo kuch bola gaya hai, woh character ne khud camera par bola hai, usi ke labon ki harkat ke saath. Download dabao to video isi ratio/size mein render ho kar milegi (recording mein utne hi second lagein ge jitni lambi video hai). Prototype format WebM hai; production mein yehi MP4 (H.264) hoga, aur wahan character ki asal AI awaaz usi ke munh se niklegi — peeche se koi alag narrator track nahi lagega.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <button class="pbtn" id="downloadBtn" type="button" style="background:var(--accent);color:#fff">⬇ Download — <span id="dlRatioLabel">16:9 • 1080p</span></button>
         <button class="pbtn secondary" id="extendBtn" type="button">＋ Extend +8s</button>
@@ -347,7 +364,7 @@ footer{margin-top:32px;border-top:1px solid var(--line);padding-top:15px;color:v
       <span class="ic" aria-hidden="true">💬</span>
       <div>
         <strong>Ek hi jagah — Image + Prompt, bilkul chat ki tarah</strong>
-        <p>Jaise chat mein karte ho: <b>1)</b> image lagao, <b>2)</b> prompt likho, <b>3)</b> agar character kuch bolay to chhoti script likho, phir <b>Generate</b> dabao. Video upar wale preview mein ban jayegi aur neeche Library mein save ho jayegi. Bas — koi alag sections, koi tayyar misalein nahi.</p>
+        <p>Jaise chat mein karte ho: <b>1)</b> image lagao, <b>2)</b> prompt likho, <b>3)</b> character jo bolay ga woh dialogue likho, phir <b>Generate</b> dabao. <b>Is mein background voice-over bilkul nahi hai</b> — peeche se koi doosri awaaz nahi aayegi, jo character screen par hoga <b>wohi khud bolega</b>, usi ke lab hilenge. Video upar wale preview mein ban jayegi aur neeche Library mein save ho jayegi.</p>
       </div>
     </div>
 
@@ -392,35 +409,38 @@ footer{margin-top:32px;border-top:1px solid var(--line);padding-top:15px;color:v
       </div>
     </div>
 
-    <!-- STEP 3: SCRIPT (optional, alag) -->
+    <!-- STEP 3: DIALOGUE — character KHUD bolay ga, voice-over NAHI -->
     <div class="field-block script-block">
-      <p class="step-label"><span><span class="step-num green">3</span> Script — character kya bolay <span class="field-badge spoken">🗣 SIRF ye bola jayega</span> <span class="field-badge optional">Optional — khaali chhoro to sirf motion video banegi</span></span>
+      <p class="step-label"><span><span class="step-num green">3</span> Dialogue — character khud bolay ga <span class="field-badge spoken">🗣 ON-CAMERA — CHARACTER KE MUNH SE</span> <span class="field-badge notspoken">🔇 Voice-over OFF</span></span>
         <span class="lab-actions"><button class="mini-btn" id="expandScriptBtn" type="button">⤢ Bara Editor</button></span>
       </p>
-      <textarea id="scriptInput" placeholder="Sirf woh alfaaz jo character bolay ga — chhote rakho: 8–10 second mein ~20–25 alfaaz. Prompt yahan mat likho, wo upar wale box mein hai…">Assalam-o-Alaikum! Aaj main aap ko bataon gi ke sirf ek image se bolti hui video kaise banti hai.</textarea>
+      <div class="audio-mode" role="group" aria-label="Audio mode">
+        <div class="mode-opt on"><span class="tag">✓ ON — YAHI HOGA</span><strong>Character khud bolay ga</strong><span>Screen par jo character hai, wohi camera ki taraf dekh kar bolay ga. Awaaz usi ke munh se niklegi, lab usi ke hilenge, haath ke ishare usi ke honge.</span></div>
+        <div class="mode-opt off"><span class="tag">✕ OFF — BAND HAI</span><strong>Background voice-over</strong><span>Peeche se alag narrator awaaz — ye is tool mein istemal NAHI hoti. Is liye ye option band rakha hai, on karne ka koi button nahi.</span></div>
+      </div>
+      <textarea id="scriptInput" placeholder="Sirf woh alfaaz jo character apne munh se bolay ga — chhote rakho: 8–10 second mein ~20–25 alfaaz. Ye background mein nahi chalega, character khud bolay ga. Prompt yahan mat likho, wo upar wale box mein hai…">Assalam-o-Alaikum! Aaj main aap ko bataon gi ke sirf ek image se bolti hui video kaise banti hai.</textarea>
       <div class="char-count" id="scriptCount"></div>
       <div class="fit-meter" id="fitMeter">
         <div class="fit-row">
           <span>Alfaaz <b id="fitWords">0</b></span>
-          <span>Bolne ka time ~<b id="fitSpeak">0s</b></span>
+          <span>Character ke bolne ka time ~<b id="fitSpeak">0s</b></span>
           <span>Video duration <b id="fitDur">8s</b></span>
-          <span class="fit-status ok" id="fitStatus">✓ Script duration mein fit hai</span>
+          <span class="fit-status ok" id="fitStatus">✓ Dialogue duration mein fit hai</span>
         </div>
         <div class="fit-bar"><i id="fitBar"></i></div>
         <div class="fit-actions">
-          <button class="mini-btn" id="fitDurationBtn" type="button">⏱ Duration script ke hisaab se set karo</button>
-          <button class="mini-btn" id="speakTestBtn" type="button">🔊 Script sun kar test karo (sirf script bolay gi)</button>
+          <button class="mini-btn" id="fitDurationBtn" type="button">⏱ Duration dialogue ke hisaab se set karo</button>
+          <button class="mini-btn" id="speakTestBtn" type="button">▶ Character ko bolta suno (yehi dialogue, character ki awaaz mein)</button>
         </div>
       </div>
       <div class="voice-row">
-        <span>Awaz:</span>
-        <button class="voice-btn on" data-voice="Natural Female" type="button">Natural Female</button>
-        <button class="voice-btn" data-voice="Confident Female" type="button">Confident Female</button>
-        <button class="voice-btn" data-voice="Urdu Female" type="button">Urdu Female</button>
-        <button class="voice-btn" data-voice="Male Presenter" type="button">Male Presenter</button>
-        <button class="voice-btn" data-voice="Soft Narrator" type="button">Soft Narrator</button>
+        <span>Character ki apni awaaz:</span>
+        <button class="voice-btn on" data-voice="Character — Natural Female" type="button">Character — Natural Female</button>
+        <button class="voice-btn" data-voice="Character — Confident Female" type="button">Character — Confident Female</button>
+        <button class="voice-btn" data-voice="Character — Urdu Female" type="button">Character — Urdu Female</button>
+        <button class="voice-btn" data-voice="Character — Male" type="button">Character — Male</button>
       </div>
-      <p class="script-note">Play dabane par preview mein <strong>asli awaaz sirf Script</strong> bolay gi (browser ki voice se) — Prompt kabhi nahi bola jata. Jis lafz par awaaz hogi, wahi lafz subtitle mein highlight hoga aur <strong>LIP-SYNC</strong> usi rhythm par chalega.</p>
+      <p class="script-note">Play dabane par <strong>character khud bolay ga</strong> — awaaz usi ki hai, peeche se koi voice-over track nahi chal raha. Preview mein character ke upar <strong>speech bubble</strong> mein wahi dialogue dikhega jo woh bol raha hai, neeche subtitle usi lafz ko highlight karega jis par us ke lab hil rahe hain, aur <strong>LIP-SYNC</strong> usi rhythm par chalega. Dialogue khaali chhoro to character kuch nahi bolay ga — sirf motion video banegi, koi awaaz nahi aayegi.</p>
     </div>
 
     <!-- ADVANCED (collapsed) -->
@@ -502,7 +522,7 @@ footer{margin-top:32px;border-top:1px solid var(--line);padding-top:15px;color:v
     <div class="library-head">
       <div>
         <h2>Library — Tumhari Videos</h2>
-        <p class="sub">Jo video banti hai, yahan save ho jati hai. Har card par <strong style="color:#ffd97a">Scene Prompt</strong> aur <strong style="color:#8fe3b0">Script</strong> alag alag dikhte hain — prompt bola nahi gaya tha, script hi boli gayi thi.</p>
+        <p class="sub">Jo video banti hai, yahan save ho jati hai. Har card par <strong style="color:#ffd97a">Scene Prompt</strong> aur <strong style="color:#8fe3b0">Dialogue</strong> alag alag dikhte hain — prompt bola nahi gaya tha, aur jo bola gaya tha woh character ne khud bola tha. Kisi bhi video mein background voice-over nahi hai.</p>
       </div>
       <div class="stats">
         <div class="stat"><b id="statTotal">0</b><span>Videos</span></div>
@@ -552,7 +572,7 @@ footer{margin-top:32px;border-top:1px solid var(--line);padding-top:15px;color:v
   var scene=$('sceneImg'), sceneWrap=$('sceneWrap'), bgBlur=$('bgBlur'), viewport=$('viewport');
   var promptEl=$('promptInput'), scriptEl=$('scriptInput'), negEl=$('negInput');
 
-  var state={duration:8,camera:'zoom-in',motion:50,seed:4207,ratio:'16-9',playing:false,elapsedBefore:0,generated:false,recording:false,voice:'Natural Female',model:'Veo 3.1 - Fast',outputs:2,filter:'all',search:'',asset:null};
+  var state={duration:8,camera:'zoom-in',motion:50,seed:4207,ratio:'16-9',playing:false,elapsedBefore:0,generated:false,recording:false,voice:'Character — Natural Female',model:'Veo 3.1 - Fast',outputs:2,filter:'all',search:'',asset:null};
   var SPEECH_WPS=2.4;
   var library=[]; var libSeq=0;
 
@@ -625,15 +645,15 @@ footer{margin-top:32px;border-top:1px solid var(--line);padding-top:15px;color:v
     var st=$('fitStatus'), bar=$('fitBar');
     var pct=dur?Math.min(100,Math.round(need/dur*100)):0;
     bar.style.width=pct+'%';
-    if(!w){st.textContent='Script khaali hai — sirf motion video banegi, koi kuch nahi bolay ga';st.className='fit-status warn';bar.classList.add('over');return}
-    if(need<=dur){st.textContent='✓ Script '+dur+'s mein fit hai — poori bolay gi';st.className='fit-status ok';bar.classList.remove('over')}
-    else{st.textContent='⚠ Script lambi hai — '+dur+'s mein poori NAHI bolay gi. Duration '+need+'s karo ya script chhoti karo';st.className='fit-status warn';bar.classList.add('over')}
+    if(!w){st.textContent='Dialogue khaali hai — character kuch nahi bolay ga, sirf motion video banegi (koi awaaz nahi)';st.className='fit-status warn';bar.classList.add('over');return}
+    if(need<=dur){st.textContent='✓ Dialogue '+dur+'s mein fit hai — character poora bolay ga';st.className='fit-status ok';bar.classList.remove('over')}
+    else{st.textContent='⚠ Dialogue lamba hai — '+dur+'s mein character poora NAHI bol paye ga. Duration '+need+'s karo ya dialogue chhota karo';st.className='fit-status warn';bar.classList.add('over')}
   }
   function updateCounts(){
     var c=counts(promptEl.value);
     $('charCount').innerHTML='<span>Characters <b>'+c.chars.toLocaleString()+'</b></span><span>Words <b>'+c.words.toLocaleString()+'</b></span><span>Lines <b>'+c.lines.toLocaleString()+'</b></span><span class="free">🔇 Sirf scene description — bola NAHI jayega, subtitles mein NAHI aayega. Koi limit nahi.</span>';
     var s=counts(scriptEl.value);
-    $('scriptCount').innerHTML='<span>Script: <b>'+s.chars.toLocaleString()+'</b> characters • <b>'+s.words.toLocaleString()+'</b> words</span><span class="free">🗣 Sirf yehi bola jayega — 8–10s ke liye ~20–25 alfaaz best hain</span>';
+    $('scriptCount').innerHTML='<span>Dialogue: <b>'+s.chars.toLocaleString()+'</b> characters • <b>'+s.words.toLocaleString()+'</b> words</span><span class="free">🗣 Character khud yehi bolay ga, apne munh se — background voice-over NAHI hai. 8–10s ke liye ~20–25 alfaaz best hain</span>';
     updateFitMeter();
   }
   promptEl.addEventListener('input',updateCounts);
@@ -641,16 +661,16 @@ footer{margin-top:32px;border-top:1px solid var(--line);padding-top:15px;color:v
   $('clearPromptBtn').addEventListener('click',function(){promptEl.value='';updateCounts();promptEl.focus()});
   $('fitDurationBtn').addEventListener('click',function(){
     var need=speakSeconds();
-    if(!need){toast('Pehle script likho — phir duration us ke hisaab se lagega');scriptEl.focus();return}
+    if(!need){toast('Pehle dialogue likho — phir duration us ke hisaab se lagega');scriptEl.focus();return}
     var opts=[8,10,15,20,30], pick=opts[opts.length-1];
     for(var i=0;i<opts.length;i++){if(opts[i]>=need){pick=opts[i];break}}
     setDuration(pick);
-    toast('Duration '+pick+'s set ho gaya — script (~'+need+'s bolna) is mein fit hai');
+    toast('Duration '+pick+'s set ho gaya — dialogue (~'+need+'s bolna) is mein fit hai');
   });
   $('speakTestBtn').addEventListener('click',function(){
-    if(!scriptEl.value.trim()){toast('Script khaali hai — jo bolwana hai woh script mein likho (prompt bola nahi jata)');scriptEl.focus();return}
+    if(!scriptEl.value.trim()){toast('Dialogue khaali hai — jo character se bulwana hai woh dialogue mein likho (prompt bola nahi jata)');scriptEl.focus();return}
     speakScript();
-    toast('Sun lo: sirf Script boli ja rahi hai — Prompt ka ek lafz bhi nahi');
+    toast('Ye character ki apni awaaz hai — koi background voice-over nahi chal raha');
   });
   $('enhanceBtn').addEventListener('click',function(){
     var v=promptEl.value.trim(); if(!v){toast('Pehle kuch prompt likho');return}
@@ -670,7 +690,7 @@ footer{margin-top:32px;border-top:1px solid var(--line);padding-top:15px;color:v
   var editorTarget='prompt';
   function openEditor(which){
     editorTarget=which;
-    $('editorTitle').textContent=which==='script'?'Bara Script Editor — character kya bolay ga':'Bara Prompt Editor';
+    $('editorTitle').textContent=which==='script'?'Bara Dialogue Editor — character khud kya bolay ga':'Bara Prompt Editor';
     $('editorText').value=which==='script'?scriptEl.value:promptEl.value;
     updateEditorCount();
     $('editorOverlay').classList.add('show');
@@ -718,7 +738,7 @@ footer{margin-top:32px;border-top:1px solid var(--line);padding-top:15px;color:v
   function updateSpec(){
     var r=ratioInfo(), a=state.asset, frames=state.duration*24;
     $('specLine').innerHTML='IMAGE <b>'+(a?esc(a.name.toUpperCase()):'— NAHI LAGI')+'</b> • MODEL <b>'+esc(state.model.toUpperCase())+'</b> • OUT <b>×'+state.outputs+'</b>'
-      +(talking()?'<br>SCRIPT <b>BOLAY GI</b> • AWAZ <b>'+esc(state.voice.toUpperCase())+'</b> • PROMPT <b>NAHI BOLAY GA</b>':'<br>SCRIPT <b>KHAALI — SIRF MOTION VIDEO</b>')
+      +(talking()?'<br>AUDIO <b>CHARACTER KHUD BOLAY GA — ON-CAMERA</b> • CHARACTER KI AWAZ <b>'+esc(state.voice.toUpperCase())+'</b> • BACKGROUND VOICE-OVER <b>OFF — NAHI LAGEGA</b> • PROMPT <b>NAHI BOLAY GA</b>':'<br>AUDIO <b>KHAALI — CHARACTER KUCH NAHI BOLAY GA, SIRF MOTION VIDEO</b> • BACKGROUND VOICE-OVER <b>OFF</b>')
       +'<br>RATIO <b>'+r.label+' • '+r.w+' × '+r.h+' HD</b> • DURATION <b>'+state.duration+' SEC</b> • <b>'+frames+' FRAMES</b> @24FPS'
       +'<br>CAMERA <b>'+state.camera.replace(/-/g,' ').toUpperCase()+'</b> • MOTION <b>'+state.motion+'%</b> • SEED <b>'+state.seed+'</b> • FORMAT <b>WebM proto / MP4 prod</b>';
     $('tcBadge').textContent='00:00 / '+fmt(state.duration);
@@ -761,7 +781,9 @@ footer{margin-top:32px;border-top:1px solid var(--line);padding-top:15px;color:v
       s.textContent='✋ gesture'; t.appendChild(s);
     }
   }
-  /* Asli awaaz: SIRF Script — Prompt kabhi nahi */
+  /* Character ki apni awaaz: SIRF Dialogue, character ke munh se — ye background voice-over NAHI hai.
+     Koi alag narrator track nahi banta; awaaz dialogue ke saath lip-sync mein chalti hai aur
+     preview mein speech bubble character ke upar hi dikhta hai. Prompt kabhi nahi bola jata. */
   var voiceActive=false, spokenWordIdx=-1, speechCycle=-1;
   function wordIndexAtChar(text,charIdx){var upto=String(text).slice(0,charIdx+1).trim();return upto?upto.split(/\s+/).length-1:0}
   function speakScript(){
@@ -771,18 +793,19 @@ footer{margin-top:32px;border-top:1px solid var(--line);padding-top:15px;color:v
     try{
       speechSynthesis.cancel();
       var u=new SpeechSynthesisUtterance(text);
-      u.rate=1; u.pitch=state.voice==='Male Presenter'?0.92:1.03;
-      u.lang=state.voice==='Urdu Female'?'ur-PK':'en-US';
+      var isMale=state.voice.indexOf('Male')>=0, isUrdu=state.voice.indexOf('Urdu')>=0;
+      u.rate=1; u.pitch=isMale?0.92:1.03;
+      u.lang=isUrdu?'ur-PK':'en-US';
       var vs=speechSynthesis.getVoices()||[], chosen=null, i, nm, lg;
       for(i=0;i<vs.length;i++){nm=(vs[i].name||'').toLowerCase(); lg=(vs[i].lang||'').toLowerCase();
-        if(state.voice==='Urdu Female'&&lg.indexOf('ur')===0){chosen=vs[i];break}
-        if(state.voice==='Male Presenter'&&(nm.indexOf('david')>=0||nm.indexOf('daniel')>=0||nm.indexOf('male')>=0)){chosen=vs[i];break}
-        if(state.voice!=='Male Presenter'&&state.voice!=='Urdu Female'&&(nm.indexOf('zira')>=0||nm.indexOf('samantha')>=0||nm.indexOf('female')>=0||nm.indexOf('aria')>=0||nm.indexOf('jenny')>=0||nm.indexOf('veena')>=0)){chosen=vs[i];break}
+        if(isUrdu&&lg.indexOf('ur')===0){chosen=vs[i];break}
+        if(isMale&&(nm.indexOf('david')>=0||nm.indexOf('daniel')>=0||nm.indexOf('male')>=0)){chosen=vs[i];break}
+        if(!isMale&&!isUrdu&&(nm.indexOf('zira')>=0||nm.indexOf('samantha')>=0||nm.indexOf('female')>=0||nm.indexOf('aria')>=0||nm.indexOf('jenny')>=0||nm.indexOf('veena')>=0)){chosen=vs[i];break}
       }
       if(chosen)u.voice=chosen;
       u.onboundary=function(e){if(typeof e.charIndex==='number'){spokenWordIdx=wordIndexAtChar(text,e.charIndex);var p=state.duration?(state.elapsedBefore%state.duration)/state.duration:0;updateCaptions(p)}};
-      u.onstart=function(){voiceActive=true;$('lipBox').classList.add('show');sceneWrap.classList.add('talking');$('captionBox').classList.add('show')};
-      u.onend=u.onerror=function(){voiceActive=false;spokenWordIdx=-1;if(!state.playing){$('lipBox').classList.remove('show');sceneWrap.classList.remove('talking')}};
+      u.onstart=function(){voiceActive=true;$('lipBox').classList.add('show');sceneWrap.classList.add('talking');$('captionBox').classList.add('show');$('dialogueBubble').classList.add('show')};
+      u.onend=u.onerror=function(){voiceActive=false;spokenWordIdx=-1;if(!state.playing){$('lipBox').classList.remove('show');sceneWrap.classList.remove('talking');$('dialogueBubble').classList.remove('show')}};
       speechSynthesis.speak(u);
     }catch(e){}
   }
@@ -790,6 +813,7 @@ footer{margin-top:32px;border-top:1px solid var(--line);padding-top:15px;color:v
   function updateCaptions(p){
     var show=talking()&&(state.playing||state.generated||voiceActive);
     $('captionBox').classList.toggle('show',!!show);
+    $('dialogueBubble').classList.toggle('show',!!show);
     $('lipBox').classList.toggle('show',!!(talking()&&(state.playing||voiceActive)));
     sceneWrap.classList.toggle('talking',!!(talking()&&(state.playing||voiceActive)));
     var g=talking()&&state.playing?gestureAt(p):-1;
@@ -797,11 +821,13 @@ footer{margin-top:32px;border-top:1px solid var(--line);padding-top:15px;color:v
     if(g>=0)$('gestureTag').textContent=GESTURES[g];
     if(!show)return;
     var w=scriptWords(), idx=(voiceActive&&spokenWordIdx>=0)?Math.min(w.length-1,spokenWordIdx):Math.min(w.length-1,Math.floor(p*w.length));
-    var start=Math.max(0,Math.floor(idx/6)*6), html='';
+    var start=Math.max(0,Math.floor(idx/6)*6), html='', bubble='';
     for(var i=start;i<Math.min(w.length,start+6);i++){
       html+=(i===idx?'<span class="cur">'+esc(w[i])+'</span>':esc(w[i]))+' ';
+      bubble+=(i===idx?'<span style="background:#ffe9a8;border-radius:4px;padding:0 3px">'+esc(w[i])+'</span>':esc(w[i]))+' ';
     }
     $('captionText').innerHTML=html;
+    $('dialogueText').innerHTML=bubble;
   }
   var raf=null,lastTs=null;
   function loop(ts){
@@ -820,9 +846,9 @@ footer{margin-top:32px;border-top:1px solid var(--line);padding-top:15px;color:v
   }
   function play(){
     if(!state.asset){toast('Pehle composer mein image lagao — phir preview chalega');document.getElementById('composer').scrollIntoView({behavior:'smooth'});return}
-    if(state.playing)return;state.playing=true;speechCycle=-1;lastTs=null;$('playBtn').textContent='⏸ Pause';$('playStateLabel').textContent=talking()?'BOL RAHA HAI':'PLAYING';updateCaptions(0);raf=requestAnimationFrame(loop)
+    if(state.playing)return;state.playing=true;speechCycle=-1;lastTs=null;$('playBtn').textContent='⏸ Pause';$('playStateLabel').textContent=talking()?'CHARACTER BOL RAHA HAI':'PLAYING';updateCaptions(0);raf=requestAnimationFrame(loop)
   }
-  function pause(){state.playing=false;stopSpeech();$('playBtn').textContent='▶ Play Preview';$('playStateLabel').textContent=state.generated?'RESULT':'PREVIEW';$('lipBox').classList.remove('show');$('gestureTag').classList.remove('show');sceneWrap.classList.remove('talking');if(raf)cancelAnimationFrame(raf)}
+  function pause(){state.playing=false;stopSpeech();$('playBtn').textContent='▶ Play Preview';$('playStateLabel').textContent=state.generated?'RESULT':'PREVIEW';$('lipBox').classList.remove('show');$('gestureTag').classList.remove('show');$('dialogueBubble').classList.remove('show');sceneWrap.classList.remove('talking');if(raf)cancelAnimationFrame(raf)}
   function resetPlayback(){pause();state.elapsedBefore=0;scene.style.transform='scale(1)';$('timelineFill').style.width='0%';$('tcNow').textContent='00:00.0';$('tcBadge').textContent='00:00 / '+fmt(state.duration);updateCaptions(0)}
   $('playBtn').addEventListener('click',function(){state.playing?pause():play()});
   $('restartBtn').addEventListener('click',function(){resetPlayback();play()});
@@ -835,9 +861,9 @@ footer{margin-top:32px;border-top:1px solid var(--line);padding-top:15px;color:v
   $('generateBtn').addEventListener('click',function(){
     if(!state.asset){toast('Step 1 reh gaya: pehle composer mein apni image lagao');drop.scrollIntoView({behavior:'smooth',block:'center'});return}
     if(!promptEl.value.trim()){toast('Step 2 reh gaya: Scene Prompt likho — ye sirf visual description hai, bola nahi jata');promptEl.focus();return}
-    if(talking()&&speakSeconds()>state.duration){toast('⚠ Script ~'+speakSeconds()+'s ki hai lekin duration '+state.duration+'s hai — poori nahi bolay gi. Fit-meter se duration barhao ya script chhoti karo')}
+    if(talking()&&speakSeconds()>state.duration){toast('⚠ Dialogue ~'+speakSeconds()+'s ka hai lekin duration '+state.duration+'s hai — character poora nahi bol paye ga. Fit-meter se duration barhao ya dialogue chhota karo')}
     pause(); resetPlayback(); viewport.classList.add('generating'); $('generateBtn').disabled=true;
-    var talkStages=[[0,'Image analyse ho rahi hai — character pehchana ja raha hai…'],[14,'Prompt parha ja raha hai — sirf visual plan ke liye (ye bola NAHI jayega)…'],[30,'Sirf Script se awaz ban rahi hai ('+state.voice+') — prompt ka ek lafz bhi nahi…'],[48,'Lip-sync: labon ki harkat script ke har lafz se milayi ja rahi hai…'],[62,'Sar ki natural harkat + haath ke ishare choreograph ho rahe hain…'],[76,'Frames render ho rahe hain (24 fps)…'],[90,'1080p upscale + sharpen ho raha hai…'],[97,'Encode ho raha hai…']];
+    var talkStages=[[0,'Image analyse ho rahi hai — character pehchana ja raha hai…'],[14,'Prompt parha ja raha hai — sirf visual plan ke liye (ye bola NAHI jayega)…'],[28,'Background voice-over NAHI ban raha — audio mode sirf character dialogue hai…'],[44,'Character khud bol raha hai ('+state.voice+') — awaaz usi ke munh se, koi narrator track nahi…'],[60,'Lip-sync: character ke labon ki harkat dialogue ke har lafz se milayi ja rahi hai…'],[72,'Sar ki natural harkat + haath ke ishare choreograph ho rahe hain…'],[84,'Frames render ho rahe hain (24 fps)…'],[93,'1080p upscale + sharpen ho raha hai…'],[97,'Encode ho raha hai — voice-over track bilkul nahi…']];
     var stdStages=[[0,'Image analyse ho rahi hai…'],[16,'Prompt parha ja raha hai — sirf motion/visual plan ke liye…'],[36,'Model ('+state.model+') frames bana raha hai (24 fps)…'],[58,'Camera path + motion smooth ho raha hai…'],[76,'1080p upscale + sharpen ho raha hai…'],[90,'Encode ho raha hai…'],[97,'Final touches…']];
     var stages=talking()?talkStages:stdStages;
     $('jobStatus').innerHTML='STATUS: <b style="color:var(--amber)">GENERATING ×'+state.outputs+'…</b> — '+state.duration+'s • '+ratioInfo().label+' • '+esc(state.model)+' • '+esc(state.asset.name);
@@ -886,10 +912,10 @@ footer{margin-top:32px;border-top:1px solid var(--line);padding-top:15px;color:v
       if(state.search&&((v.name+' '+v.prompt+' '+(v.script||'')).toLowerCase().indexOf(state.search)<0))return;
       shown++;
       var card=document.createElement('div'); card.className='lib-card';
-      card.innerHTML='<div class="thumb"><img src="" alt=""><span class="mode-badge '+(v.script?'talk':'')+'">'+(v.script?'🗣 BOLTI HUI':'🎞 MOTION')+'</span><span class="dur-badge">'+v.duration+'s</span></div>'
+      card.innerHTML='<div class="thumb"><img src="" alt=""><span class="mode-badge '+(v.script?'talk':'')+'">'+(v.script?'🗣 CHARACTER KHUD BOLA • NO VOICE-OVER':'🎞 MOTION • NO VOICE')+'</span><span class="dur-badge">'+v.duration+'s</span></div>'
         +'<div class="lib-body"><strong>'+esc(v.name)+'</strong>'
         +'<p class="prompt-txt"><span class="k">🔇 SCENE PROMPT — BOLA NAHI GAYA</span>"'+esc(v.prompt)+'"</p>'
-        +(v.script?'<p class="prompt-txt say"><span class="k">🗣 SCRIPT — YE BOLA GAYA</span>"'+esc(v.script)+'"</p>':'<p class="prompt-txt say"><span class="k">🗣 SCRIPT</span>(koi dialogue nahi — sirf motion video thi)</p>')
+        +(v.script?'<p class="prompt-txt say"><span class="k">🗣 DIALOGUE — CHARACTER NE KHUD BOLA (VOICE-OVER NAHI)</span>"'+esc(v.script)+'"</p>':'<p class="prompt-txt say"><span class="k">🗣 DIALOGUE</span>(koi dialogue nahi — sirf motion video thi, koi awaaz nahi)</p>')
         +'<div class="meta-line">'+esc(v.model)+' • '+v.ratioLabel+' • '+v.w+'×'+v.h+' • '+esc(v.camera.replace(/-/g,' ').toUpperCase())+' • SEED '+v.seed+'<br>Bani: '+v.time+' • <span class="st">● READY</span></div>'
         +'<div class="lib-actions"><button class="primary" data-act="play" type="button">▶ Play</button><button data-act="dl" type="button">⬇ Down</button><button data-act="extend" type="button">+8s Extend</button><button data-act="reuse" type="button">↻ Dobara</button><button data-act="del" type="button">🗑</button></div></div>';
       var im=card.querySelector('img'); im.src=v.src; im.alt=v.name;
