@@ -172,6 +172,29 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 .uploadbox:hover{border-color:#555;color:var(--ink2)}
 .uploadbox img{max-width:100%;max-height:190px;border-radius:8px;display:block;margin:0 auto 8px}
 
+/* Hugging Face integration */
+.mthumb video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
+.mthumb .chip,.mthumb .fav{z-index:2}
+.hfprog{position:fixed;left:50%;bottom:118px;transform:translateX(-50%);width:min(540px,94vw);background:#232323;border:1px solid var(--line2);border-radius:16px;padding:15px 18px;z-index:400;box-shadow:0 20px 55px rgba(0,0,0,.65);display:none}
+.hfprog.show{display:block;animation:fade .15s ease}
+.hfprog .hft{font-weight:800;font-size:14.5px;display:flex;gap:9px;align-items:center}
+.hfprog .hfs{font-size:12.5px;color:var(--muted);margin-top:3px;font-family:var(--mono)}
+.hfprog .bar{height:8px;background:#101010;border:1px solid var(--line);border-radius:99px;overflow:hidden;margin-top:10px}
+.hfprog .bar i{display:block;height:100%;width:0%;background:#fff;border-radius:99px;transition:width .4s ease}
+.hfprog .hfr{display:flex;gap:8px;align-items:center;margin-top:11px}
+.hfstat{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.hfstat:last-child{border-bottom:0}
+.hfstat .dot{width:9px;height:9px;border-radius:50%;flex:0 0 9px;background:var(--faint)}
+.hfstat .dot.on{background:var(--green)}
+.hfstat .dot.off{background:var(--red)}
+.hfstat .hm{flex:1;min-width:0}
+.hfstat .hm .mid{font-family:var(--mono);font-size:11.5px;color:var(--faint)}
+.hfstat .hs{font-size:12px;color:var(--muted);font-weight:700;white-space:nowrap}
+.scene-gen{margin-top:12px}
+.scene-gen img,.scene-gen video{width:100%;max-height:300px;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block;background:#000}
+.tokenrow{display:flex;gap:8px;flex-wrap:wrap}
+.tokenrow input{flex:1;min-width:200px}
+
 /* scenes */
 .scene-card{background:var(--panel);border:1px solid #242424;border-radius:var(--radius);padding:18px;margin-bottom:14px}
 .scene-card .shead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
@@ -239,7 +262,7 @@ body.dragging .drophint{display:grid}
 .cplus{width:38px;height:38px;flex:0 0 38px;border-radius:50%;background:var(--panel2);border:1px solid var(--line2);color:var(--ink);display:grid;place-items:center;margin-bottom:2px}
 .cplus:hover{background:var(--panel3)}
 .cplus.open{background:#fff;color:#111;border-color:#fff}
-#composerInput{flex:1;background:none;border:0;resize:none;min-height:40px;max-height:130px;padding:10px 4px;font-size:15.5px;color:var(--ink);line-height:1.45}
+#composerInput{flex:1;min-width:0;background:none;border:0;resize:none;min-height:40px;max-height:130px;padding:10px 4px;font-size:15.5px;color:var(--ink);line-height:1.45}
 #composerInput:focus{outline:none}
 #composerInput::placeholder{color:var(--faint)}
 .cactions{display:flex;align-items:center;gap:6px;margin-bottom:2px}
@@ -358,6 +381,10 @@ body.dragging .drophint{display:grid}
   .searchpill{height:40px}
   .composer{border-radius:22px}
   .cactions .modelchip .mc-long{display:none}
+  .cactions .modelchip{max-width:110px;padding:7px 10px}
+  .cactions .modelchip #chipText{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cactions .modelchip .mc-sep,.cactions #chipCount{display:none}
+  .cactions{flex:0 0 auto}
   .picker .pk-rail{width:56px;flex-basis:56px;padding:6px}
   .picker .pk-rail button{justify-content:center}
   .picker .pk-rail button .rl{display:none}
@@ -386,7 +413,7 @@ body.dragging .drophint{display:grid}
       <button id="btnCreateTool"><span class="icn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><span class="lbl">Create tool</span></button>
     </nav>
     <div class="side-foot">
-      <div class="side-note"><span style="color:var(--red)">●</span> Veo / Runway not connected — renders are recorded as <strong style="color:var(--ink2)">Needs provider</strong>, never faked.</div>
+      <div class="side-note" id="hfSideNote"><span style="color:var(--red)">●</span> Hugging Face not connected — add your token in <strong style="color:var(--ink2)">Settings</strong> to generate real images &amp; videos.</div>
       <nav class="nav">
         <button data-nav="bin"><span class="icn"><svg viewBox="0 0 24 24"><path d="M4 6.5h16"/><path d="M9 6V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V6"/><path d="M6.5 6.5 7.4 19a1.5 1.5 0 0 0 1.5 1.4h6.2a1.5 1.5 0 0 0 1.5-1.4l.9-12.5"/><path d="M10 10.5v6M14 10.5v6"/></svg></span><span class="lbl">Bin</span><span class="cnt" id="navBinCount">0</span></button>
         <button id="btnCollapse"><span class="icn"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M9.5 4.5v15"/><path d="M15.5 9.5 13.5 12l2 2.5"/></svg></span><span class="lbl">Collapse</span></button>
@@ -423,6 +450,7 @@ body.dragging .drophint{display:grid}
           <div class="et">Start creating or drop media</div>
           <p style="color:var(--muted);font-size:13.5px;max-width:430px">Type in the composer below, drop an image anywhere on this canvas, or open a tool — storyboard, automotive, editor and more — from the sidebar.</p>
         </div>
+        <div class="notice" id="hfTokenNotice" style="display:none;margin-bottom:16px"><strong>Hugging Face token needed.</strong> Real image &amp; video generation runs on Hugging Face models (FLUX, Wan, LTX and more). Add your free Hugging Face access token to start generating — nothing is faked here. <button class="btn small primary" id="btnHfGoSettings" style="margin-left:8px">Open Settings</button></div>
         <div class="mgrid" id="mediaGrid"></div>
       </section>
 
@@ -484,7 +512,7 @@ body.dragging .drophint{display:grid}
         <div class="grid c4">
           <div class="stat"><div class="n" id="statProjects">0</div><div class="l">Projects in this browser</div></div>
           <div class="stat"><div class="n" id="statScenes">0</div><div class="l">Scenes across all projects</div></div>
-          <div class="stat"><div class="n" id="statRenders">0</div><div class="l">Render requests (Needs provider)</div></div>
+          <div class="stat"><div class="n" id="statRenders">0</div><div class="l">Generation requests (Hugging Face)</div></div>
           <div class="stat"><div class="n" id="statAssets">0</div><div class="l">References in library</div></div>
         </div>
       </section>
@@ -507,7 +535,7 @@ body.dragging .drophint{display:grid}
         <button class="toolback" data-back>← Back to canvas</button>
         <div class="sectionhead">
           <h2>Storyboard Studio</h2>
-          <p>Enter a topic, product, car or idea. AutoFlow writes the concept and a scene-by-scene plan in your browser — every scene carries its own image prompt, video prompt, camera, lighting, duration, voiceover line and sound effects. Edit anything, regenerate a single scene, delete it, or move it up and down.</p>
+          <p>Enter a topic, product, car or idea. With a Hugging Face token, Llama 3.3 70B (Qwen 2.5 72B fallback) writes the concept and scene-by-scene plan for real; if that call fails — or no token is set — AutoFlow clearly falls back to its built-in scene templates. Every scene carries its own image prompt, video prompt, camera, lighting, duration, voiceover line and sound effects, and each scene can render its own image or video on Hugging Face. Edit anything, regenerate a single scene, delete it, or move it up and down.</p>
         </div>
         <div class="card" style="margin-bottom:18px">
           <div class="grid c2">
@@ -584,7 +612,7 @@ body.dragging .drophint{display:grid}
         <button class="toolback" data-back>← Back to canvas</button>
         <div class="sectionhead">
           <h2>Image Generator</h2>
-          <p>Write a prompt and AutoFlow builds a full generation set: the master prompt plus ready-to-use variations, each with the style, ratio and negative prompt applied. Actual image rendering needs a connected image provider (Settings) — requests are queued honestly as “Needs provider”, never faked.</p>
+          <p>Write a prompt, pick a Hugging Face image model, and generate real images — each variation is rendered by the model and saved to All media. FLUX.1-schnell is fastest, FLUX.1-dev is best quality, Stable Diffusion 3.5 Large is the versatile alternative. Without a Hugging Face token (Settings) generation can’t run — you can still preview the variation prompts.</p>
         </div>
         <div class="grid c2">
           <div class="card">
@@ -598,17 +626,23 @@ body.dragging .drophint{display:grid}
             </div>
             <div class="field"><label for="imgNegative">Negative prompt</label>
               <input id="imgNegative" value="blurry, distorted, watermark, extra objects, wrong proportions" /></div>
+            <div class="field"><label for="imgModel">Hugging Face model</label>
+              <select id="imgModel">
+                <option value="black-forest-labs/FLUX.1-schnell" selected>FLUX.1-schnell — fast</option>
+                <option value="black-forest-labs/FLUX.1-dev">FLUX.1-dev — best quality</option>
+                <option value="stabilityai/stable-diffusion-3.5-large">Stable Diffusion 3.5 Large</option>
+              </select></div>
             <div class="field"><label for="imgVars">Variations</label>
               <select id="imgVars"><option>2</option><option selected>4</option><option>6</option></select></div>
             <div class="rowbtns">
-              <button class="btn primary" id="btnImgGenerate">Build variation set</button>
-              <button class="btn" id="btnImgQueue">Queue image requests</button>
+              <button class="btn primary" id="btnImgGenerate">Generate images · Hugging Face</button>
+              <button class="btn" id="btnImgQueue">Preview variation prompts</button>
             </div>
           </div>
           <div class="card">
-            <h3>Variation set</h3>
-            <p style="color:var(--muted);font-size:13.5px;margin-bottom:12px">Copy any variation into the composer or a storyboard scene.</p>
-            <div id="imgOut"><div class="empty">No variations yet — write a prompt and press “Build variation set”.</div></div>
+            <h3>Generated images</h3>
+            <p style="color:var(--muted);font-size:13.5px;margin-bottom:12px">Real renders from Hugging Face appear here and in All media — download them or send a prompt back to the composer.</p>
+            <div id="imgOut"><div class="empty">No images yet — write a prompt and press “Generate images · Hugging Face”.</div></div>
           </div>
         </div>
       </section>
@@ -618,7 +652,7 @@ body.dragging .drophint{display:grid}
         <button class="toolback" data-back>← Back to canvas</button>
         <div class="sectionhead">
           <h2>Voiceover Studio</h2>
-          <p>The character speaks its own script — there is no background narrator track. Speech uses the voices built into your browser / device, so it works fully offline in this static edition. Studio-grade voices (ElevenLabs) plug in through Settings when a key is connected.</p>
+          <p>The character speaks its own script — there is no background narrator track, and the visual prompt is never spoken. With a Hugging Face token (Settings), speech is generated by Kokoro-82M on Hugging Face (SpeechT5 as fallback) and can be played and downloaded below. Without a token, your device’s built-in voices are used and labelled as the fallback.</p>
         </div>
         <div class="grid c2">
           <div class="card">
@@ -649,7 +683,8 @@ body.dragging .drophint{display:grid}
               <button class="btn" id="btnVoStop">■ Stop</button>
               <button class="btn ghost" id="btnVoDownload">Download script (.txt)</button>
             </div>
-            <div class="hint" style="margin-top:10px">Audio-file download of the spoken voice needs a connected voice provider (ElevenLabs) — browser speech synthesis can be heard but not saved as an audio file. The script itself can always be downloaded.</div>
+            <div class="hint" style="margin-top:10px" id="voEngineHint">Voice engine: device voices (fallback — add a Hugging Face token in Settings for Kokoro AI voices you can download).</div>
+            <div id="voAudioWrap" style="margin-top:12px"></div>
           </div>
           <div class="card">
             <h3>How lines are handled</h3>
@@ -710,7 +745,7 @@ body.dragging .drophint{display:grid}
         <button class="toolback" data-back>← Back to canvas</button>
         <div class="sectionhead">
           <h2>YouTube Studio</h2>
-          <p>Turn the active project into a publish-ready pack: SEO title, long description, chapters timed from your scene durations, hashtags, keywords, and a thumbnail concept with its image prompt.</p>
+          <p>Turn the active project into a publish-ready pack: SEO title, long description, chapters timed from your scene durations, hashtags, keywords, and a thumbnail concept with its image prompt. With a Hugging Face token the writing is done by Llama 3.3 / Qwen 2.5 and the thumbnail itself is rendered by FLUX; if the AI call fails, AutoFlow says so and falls back to its built-in writer.</p>
         </div>
         <div class="rowbtns" style="margin-bottom:16px">
           <button class="btn primary" id="btnYtGenerate">Generate YouTube pack</button>
@@ -732,6 +767,7 @@ body.dragging .drophint{display:grid}
               <div class="thumb" id="ytThumb" style="height:150px;margin-bottom:12px"><span id="ytThumbText">Thumbnail concept appears here</span></div>
               <div class="field"><label for="ytThumbConcept">Thumbnail concept</label><textarea id="ytThumbConcept" style="min-height:64px"></textarea></div>
               <div class="field" style="margin-bottom:0"><label for="ytThumbPrompt">Thumbnail image prompt</label><textarea id="ytThumbPrompt" style="min-height:64px"></textarea></div>
+              <div class="rowbtns" style="margin-top:12px"><button class="btn small primary" id="btnYtThumbGen">Generate thumbnail · Hugging Face</button></div>
             </div>
           </div>
         </div>
@@ -752,53 +788,70 @@ body.dragging .drophint{display:grid}
         <button class="toolback" data-back>← Back to canvas</button>
         <div class="sectionhead">
           <h2>Settings &amp; Providers</h2>
-          <p>This static edition runs entirely in your browser. Planning, prompts, scripts, voice preview (device voices) and the editor work now. Cloud generation needs provider API keys, which in a production deployment belong on a server — never pasted into a public web page. Until then, requests are recorded below as “Needs provider”.</p>
+          <p>Generation runs on <strong>Hugging Face Inference Providers</strong> — real FLUX image models, Wan / LTX / Hunyuan / CogVideoX video models, Kokoro voices and Llama / Qwen text models, all called directly from your browser with your own Hugging Face token. The token is stored only in this browser (localStorage), never in this file and never sent anywhere except Hugging Face. Inference Providers are pay-as-you-go, and Hugging Face PRO includes monthly credits.</p>
         </div>
         <div class="grid c2">
           <div style="display:flex;flex-direction:column;gap:16px">
+            <div class="card" id="hfCard">
+              <h3>Hugging Face — generation provider <span class="tag red" id="hfTag" style="margin-left:6px">No token</span></h3>
+              <p style="color:var(--muted);font-size:13.5px;margin-bottom:12px">One token powers everything: images (FLUX.1, Stable Diffusion 3.5), video (Wan, LTX-Video, HunyuanVideo, CogVideoX), character voices (Kokoro) and AI-written storyboards &amp; YouTube packs (Llama 3.3 / Qwen 2.5). Get a free token at <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener">huggingface.co/settings/tokens</a> (a “Read” token works; Inference Providers billing or PRO credits cover the calls).</p>
+              <div class="field">
+                <label for="hfTokenInput">Hugging Face access token</label>
+                <div class="tokenrow">
+                  <input type="password" id="hfTokenInput" placeholder="hf_…" autocomplete="off" spellcheck="false" />
+                  <button class="btn small primary" id="btnHfSave">Save token</button>
+                  <button class="btn small" id="btnHfTest">Test connection</button>
+                  <button class="btn small danger" id="btnHfClear">Remove</button>
+                </div>
+                <div class="hint" id="hfStatusLine">No token saved yet — generation buttons will ask for one.</div>
+                <div class="hint" id="hfTestResult"></div>
+              </div>
+              <div class="divider"></div>
+              <h3 style="font-size:14.5px">Model status</h3>
+              <div id="hfModelStatus"></div>
+              <p style="color:var(--muted);font-size:12.5px;margin-top:10px">Credits: Hugging Face Inference Providers are pay-as-you-go per call; PRO subscribers get included monthly credits. First calls to a model can take a minute while it warms up — AutoFlow waits and shows progress.</p>
+            </div>
             <div class="card provider">
               <div class="picon"><span class="icn"><svg viewBox="0 0 24 24"><path d="M7 4.8v14.4L19 12Z"/></svg></span></div>
               <div style="flex:1">
-                <h3>Google Veo — video generation <span class="tag red" style="margin-left:6px">Not connected</span></h3>
+                <h3>Google Veo — video generation <span class="tag gold" style="margin-left:6px">Optional — HF active</span></h3>
                 <p style="color:var(--muted);font-size:13.5px">Needed for: text-to-video and image-to-video renders from the composer.</p>
                 <dl class="kv" style="margin-top:10px">
-                  <dt>API key needed</dt><dd class="mono">GOOGLE_AI_API_KEY (Google AI Studio) or a Vertex AI service account</dd>
-                  <dt>Where it goes</dt><dd>Server-side environment variable — never in this page</dd>
-                  <dt>Model</dt><dd class="mono">veo-3.x via Gemini API / Vertex AI</dd>
+                  <dt>Status</dt><dd>Not used by this studio — video generation runs on the Hugging Face models above.</dd>
+                  <dt>If added later</dt><dd>Its key would belong on a server — never in this page.</dd>
                 </dl>
               </div>
             </div>
             <div class="card provider">
               <div class="picon"><span class="icn"><svg viewBox="0 0 24 24"><path d="M7 4.8v14.4L19 12Z"/></svg></span></div>
               <div style="flex:1">
-                <h3>Runway — video generation <span class="tag red" style="margin-left:6px">Not connected</span></h3>
+                <h3>Runway — video generation <span class="tag gold" style="margin-left:6px">Optional — HF active</span></h3>
                 <p style="color:var(--muted);font-size:13.5px">Needed for: alternative video renders, scene extension and image-to-video.</p>
                 <dl class="kv" style="margin-top:10px">
-                  <dt>API key needed</dt><dd class="mono">RUNWAY_API_KEY (Runway developer portal)</dd>
-                  <dt>Where it goes</dt><dd>Server-side environment variable — never in this page</dd>
-                  <dt>Model</dt><dd class="mono">Gen-4 via Runway API</dd>
+                  <dt>Status</dt><dd>Not used by this studio — video generation runs on the Hugging Face models above.</dd>
+                  <dt>If added later</dt><dd>Its key would belong on a server — never in this page.</dd>
                 </dl>
               </div>
             </div>
             <div class="card provider">
               <div class="picon"><span class="icn"><svg viewBox="0 0 24 24"><path d="M4 10v4h3l5 4.5v-13L7 10H4Z"/><path d="M15.5 9.5a4 4 0 0 1 0 5M18 7a7.5 7.5 0 0 1 0 10"/></svg></span></div>
               <div style="flex:1">
-                <h3>ElevenLabs — studio voices <span class="tag red" style="margin-left:6px">Not connected</span></h3>
-                <p style="color:var(--muted);font-size:13.5px">Needed for: downloadable studio-grade character voice audio. Until then, Voiceover Studio and the composer use your device’s built-in voices for preview.</p>
+                <h3>ElevenLabs — studio voices <span class="tag gold" style="margin-left:6px">Optional — HF voices active</span></h3>
+                <p style="color:var(--muted);font-size:13.5px">Character voices now run on Hugging Face (Kokoro-82M, SpeechT5 fallback) when a token is set, with your device’s built-in voices as the labelled fallback. ElevenLabs remains an optional upgrade for downloadable studio audio.</p>
                 <dl class="kv" style="margin-top:10px">
-                  <dt>API key needed</dt><dd class="mono">ELEVENLABS_API_KEY</dd>
-                  <dt>Where it goes</dt><dd>Server-side environment variable — never in this page</dd>
+                  <dt>Status</dt><dd>Not used by this studio — character voices run on Hugging Face Kokoro / SpeechT5 above.</dd>
+                  <dt>If added later</dt><dd>Its key would belong on a server — never in this page.</dd>
                 </dl>
               </div>
             </div>
             <div class="card provider">
               <div class="picon"><span class="icn"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m4 18 5.5-5 3.5 3.5L17 12l3.5 3.5"/></svg></span></div>
               <div style="flex:1">
-                <h3>Image generation <span class="tag red" style="margin-left:6px">Not connected</span></h3>
-                <p style="color:var(--muted);font-size:13.5px">Needed for: rendered scene stills and thumbnails. Prompt sets are generated locally now.</p>
+                <h3>Image generation <span class="tag green" style="margin-left:6px">Hugging Face</span></h3>
+                <p style="color:var(--muted);font-size:13.5px">Scene stills, Image Generator variations and thumbnails are rendered by FLUX.1-schnell / FLUX.1-dev / Stable Diffusion 3.5 Large on Hugging Face when a token is set.</p>
                 <dl class="kv" style="margin-top:10px">
-                  <dt>API key needed</dt><dd class="mono">GOOGLE_AI_API_KEY (Imagen) or OPENAI_API_KEY</dd>
-                  <dt>Where it goes</dt><dd>Server-side environment variable — never in this page</dd>
+                  <dt>Token needed</dt><dd class="mono">Hugging Face access token — set it in the Hugging Face card above (stored only in this browser)</dd>
+                  <dt>Models</dt><dd class="mono">FLUX.1-schnell · FLUX.1-dev · stable-diffusion-3.5-large</dd>
                 </dl>
               </div>
             </div>
@@ -882,11 +935,10 @@ body.dragging .drophint{display:grid}
             <button data-res="1080p">1080p</button>
           </div>
           <div class="mp-label">Length</div>
-          <div class="mp-seg c4" id="mpDurRow">
+          <div class="mp-seg c3" id="mpDurRow">
             <button data-dur="4">4s</button>
             <button data-dur="6">6s</button>
             <button data-dur="8" class="on">8s</button>
-            <button data-dur="10">10s</button>
           </div>
         </div>
         <div class="mp-label">Outputs</div>
@@ -896,7 +948,7 @@ body.dragging .drophint{display:grid}
           <button data-count="3">×3</button>
           <button data-count="4">×4</button>
         </div>
-        <div class="mp-credits" id="mpCredits">Veo / Runway are <strong>not connected</strong> — generating records a <strong>Needs provider</strong> request. Nothing is faked.</div>
+        <div class="mp-credits" id="mpCredits">Hugging Face token <strong>needed</strong> — add it in <strong>Settings</strong> to generate on these HF models. No token, no generation, nothing faked.</div>
       </div>
 
       <!-- the composer -->
@@ -921,7 +973,7 @@ body.dragging .drophint{display:grid}
           </div>
         </div>
       </div>
-      <div class="composer-note">AutoFlow plans, prompts and scripts are generated locally in your browser. Cloud video &amp; image renders need a connected provider — see Settings.</div>
+      <div class="composer-note" id="composerNote">Add your Hugging Face token in Settings to generate real images &amp; videos — no token, no generation, nothing faked.</div>
     </div>
 
     <!-- top-right + menu -->
@@ -959,7 +1011,7 @@ body.dragging .drophint{display:grid}
     <!-- help popover -->
     <div class="pop" id="helpPop" style="top:58px;right:16px;width:min(360px,calc(100vw - 32px));padding:18px 20px">
       <h3 style="font-size:16px;margin-bottom:8px">How AutoFlow works</h3>
-      <p style="font-size:13.5px;color:var(--ink2);line-height:1.6">1. Pick or create a project (top-left).<br>2. Describe the shot in the composer — the <strong>visual prompt</strong> is what the camera sees and is <strong>never spoken</strong>.<br>3. Open the voice toggle in the composer to add a <strong>speaking script</strong>: the only words the character says, in its own voice.<br>4. Use <strong>+</strong> in the composer to attach images, characters and voices.<br>5. Build the film in Tools: Storyboard, Automotive, Editor, YouTube.<br><br>Cloud renders (Veo / Runway / ElevenLabs) need API keys on a server — until then every render is recorded honestly as <strong>Needs provider</strong> in Settings.</p>
+      <p style="font-size:13.5px;color:var(--ink2);line-height:1.6">1. Pick or create a project (top-left).<br>2. Describe the shot in the composer — the <strong>visual prompt</strong> is what the camera sees and is <strong>never spoken</strong>.<br>3. Open the voice toggle in the composer to add a <strong>speaking script</strong>: the only words the character says, in its own voice.<br>4. Use <strong>+</strong> in the composer to attach images, characters and voices.<br>5. Build the film in Tools: Storyboard, Automotive, Editor, YouTube.<br><br>Real generation runs on <strong>Hugging Face</strong> — add your token in Settings (stored only in this browser) and the composer, scene buttons, Image Generator, Voiceover Studio and YouTube Studio all generate for real. Without a token, nothing is generated and the app says so.</p>
     </div>
 
     <!-- filters panel -->
@@ -994,13 +1046,20 @@ body.dragging .drophint{display:grid}
           <label class="fcheck"><input type="checkbox" data-fgroup="res" value="1080p">1080p</label>
         </div>
         <div class="fcol"><h4>Status</h4>
-          <label class="fcheck"><input type="checkbox" data-fgroup="status" value="Needs provider">Needs provider</label>
+          <label class="fcheck"><input type="checkbox" data-fgroup="status" value="Generated · Hugging Face">Generated · Hugging Face</label>
           <label class="fcheck"><input type="checkbox" data-fgroup="status" value="Local file">Local file</label>
         </div>
       </div>
       <div class="ffoot"><span class="fcount" id="filterCount">0 results</span><button class="btn small primary" id="btnFilterClear">Clear</button></div>
     </div>
   </div>
+</div>
+
+<div class="hfprog" id="hfProg" role="status" aria-live="polite">
+  <div class="hft"><span id="hfProgTitle">Generating…</span></div>
+  <div class="hfs" id="hfProgStatus">Contacting Hugging Face…</div>
+  <div class="bar"><i id="hfProgBar"></i></div>
+  <div class="hfr"><span class="mono" id="hfProgPct" style="font-size:12px;color:var(--muted)">0%</span><span style="flex:1"></span><button class="btn small danger" id="btnHfCancel">Cancel</button></div>
 </div>
 
 <dialog id="projectDialog">
@@ -1023,9 +1082,10 @@ body.dragging .drophint{display:grid}
 "use strict";
 /* ============================================================
    AutoFlow AI Studio — Flow-style workspace (static edition)
-   Single file. All state in localStorage. No server calls.
-   Planning/prompts/scripts are generated locally by templates.
-   Cloud renders are queued as "Needs provider" — never faked.
+   Single file. App state in localStorage. Real generation runs on
+   Hugging Face Inference Providers with the user's own token
+   (stored only in localStorage — see the HF section below).
+   No token → no generation, and the UI says so. Nothing is faked.
    The visual prompt is never spoken; only the speaking script is.
    ============================================================ */
 var LS_KEY = "autoflow_static_v1";
@@ -1035,18 +1095,24 @@ var LIGHTINGS = ["Soft warm ambient","Golden hour","Bright daylight","Dramatic s
 var ENVS = ["Modern luxury indoor showroom","City street at dusk","Mountain road","Coastal highway","Minimal studio","Office interior","Desert landscape","Forest trail"];
 var SHOWROOM_DEFAULT = "Modern luxury indoor showroom with polished white marble floor, soft warm ambient lighting, large floor-to-ceiling glass windows";
 var GRADS = ["linear-gradient(135deg,#3a2c12,#171106)","linear-gradient(135deg,#12303a,#0a171c)","linear-gradient(135deg,#3a1220,#170a10)","linear-gradient(135deg,#1d2b16,#0d140a)","linear-gradient(135deg,#2c2140,#120e1c)","linear-gradient(135deg,#402f16,#1a1206)","linear-gradient(135deg,#14332e,#081512)","linear-gradient(135deg,#33231f,#150d0b)"];
-var VIDEO_MODELS = [
-  { name:"Veo 3.1 - Quality", sub:"Leaving soon — highest quality" },
-  { name:"Veo 3.1 - Fast", sub:"" },
-  { name:"Veo 3.1 - Lite", sub:"" },
-  { name:"Runway Gen-4", sub:"" },
-  { name:"Runway Gen-4 Turbo", sub:"" }
+/* Hugging Face model catalogue (Inference Providers, router.huggingface.co) */
+var HF_IMG_MODELS = [
+  { id:"black-forest-labs/FLUX.1-schnell", name:"FLUX.1-schnell", sub:"Fast — default for images" },
+  { id:"black-forest-labs/FLUX.1-dev", name:"FLUX.1-dev", sub:"Best quality" },
+  { id:"stabilityai/stable-diffusion-3.5-large", name:"Stable Diffusion 3.5 Large", sub:"Versatile alternative" }
 ];
-var IMAGE_MODELS = [
-  { name:"Imagen 4", sub:"" },
-  { name:"Imagen 4 Fast", sub:"" },
-  { name:"Imagen 4 Ultra", sub:"Highest quality" }
+var HF_T2V_MODELS = [
+  { id:"Wan-AI/Wan2.1-T2V-14B", name:"Wan 2.1 T2V 14B", sub:"Default text-to-video" },
+  { id:"Lightricks/LTX-Video", name:"LTX-Video", sub:"Fast text-to-video" },
+  { id:"tencent/HunyuanVideo", name:"HunyuanVideo", sub:"High quality text-to-video" },
+  { id:"THUDM/CogVideoX-5b", name:"CogVideoX-5b", sub:"Text-to-video" }
 ];
+var HF_I2V_MODELS = [
+  { id:"Wan-AI/Wan2.2-I2V-A14B", name:"Wan 2.2 I2V A14B", sub:"Default image-to-video" },
+  { id:"Lightricks/LTX-Video", name:"LTX-Video", sub:"Image-to-video" }
+];
+var VIDEO_MODELS = HF_T2V_MODELS;
+var IMAGE_MODELS = HF_IMG_MODELS;
 var VOICES = [
   { name:"Achernar", desc:"Female, soft, high pitch", grad:"linear-gradient(135deg,#f2b25c,#e2703a)", type:"female" },
   { name:"Achird", desc:"Male, friendly, mid pitch", grad:"linear-gradient(135deg,#e2703a,#b03a5b)", type:"male" },
@@ -1201,6 +1267,262 @@ function copyText(txt, msg){
   if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done, function(){ fallback(); }); } else fallback();
   function fallback(){ var ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); done(); }catch(e){ toast("Copy failed — select the text manually"); } ta.remove(); }
 }
+
+/* ============================================================
+   HUGGING FACE — real generation via Inference Providers
+   Base: https://router.huggingface.co — every call carries the
+   user's own token (Authorization: Bearer …). The token lives
+   ONLY in localStorage (key below), never in this file.
+   No token → no generation, and the UI says so. Nothing faked.
+   ============================================================ */
+var HF_ROUTER = "https://router.huggingface.co";
+var HF_TOKEN_KEY = "autoflow_hf_token_v1";
+var HF_TEST_KEY = "autoflow_hf_test_v1";
+var HF_TTS_MODELS = ["hexgrad/Kokoro-82M", "microsoft/speecht5_tts"];
+var HF_CHAT_MODELS = ["meta-llama/Llama-3.3-70B-Instruct", "Qwen/Qwen2.5-72B-Instruct"];
+var hfJob = { cancelled:false, controller:null };
+var lastVoiceUrl = "";
+
+function hfToken(){ try{ return (localStorage.getItem(HF_TOKEN_KEY) || "").trim(); }catch(e){ return ""; } }
+function hfHasToken(){ return hfToken().length > 10; }
+function hfHeaders(extra){
+  var h = { "Authorization": "Bearer " + hfToken() };
+  if(extra) for(var k in extra) h[k] = extra[k];
+  return h;
+}
+function hfModelUrl(modelId){ return HF_ROUTER + "/hf-inference/models/" + modelId; }
+function hfLastTest(){ try{ return JSON.parse(localStorage.getItem(HF_TEST_KEY) || "null"); }catch(e){ return null; } }
+function hfRequireToken(what){
+  if(hfHasToken()) return true;
+  toast("Hugging Face token needed to " + what + " — add it in Settings. No token, no generation.");
+  var n = $("hfTokenNotice"); if(n) n.style.display = "block";
+  goto("settings");
+  return false;
+}
+/* --- progress panel (real progress only: warm-up waits + polling) --- */
+function hfProgShow(title){
+  hfJob.cancelled = false;
+  $("hfProgTitle").textContent = title;
+  $("hfProgStatus").textContent = "Contacting Hugging Face…";
+  $("hfProgBar").style.width = "4%"; $("hfProgPct").textContent = "4%";
+  $("hfProg").classList.add("show");
+}
+function hfProgUpdate(pct, status){
+  pct = Math.max(0, Math.min(100, Math.round(pct)));
+  $("hfProgBar").style.width = pct + "%"; $("hfProgPct").textContent = pct + "%";
+  if(status) $("hfProgStatus").textContent = status;
+}
+function hfProgHide(){ $("hfProg").classList.remove("show"); }
+$("btnHfCancel").addEventListener("click", function(){
+  hfJob.cancelled = true;
+  if(hfJob.controller){ try{ hfJob.controller.abort(); }catch(e){} }
+  hfProgUpdate(0, "Cancelling…");
+});
+function hfSleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+function blobToDataURL(blob){
+  return new Promise(function(res, rej){ var r = new FileReader(); r.onload = function(){ res(r.result); }; r.onerror = rej; r.readAsDataURL(blob); });
+}
+function hfFindUrl(obj, depth){
+  if(!obj || depth > 4) return "";
+  if(typeof obj === "string") return /^https?:\/\//.test(obj) ? obj : "";
+  var keys = ["url","video_url","videoUrl","output_url","href"];
+  for(var i=0;i<keys.length;i++){ if(typeof obj[keys[i]] === "string" && /^https?:\/\//.test(obj[keys[i]])) return obj[keys[i]]; }
+  for(var k in obj){ var v = hfFindUrl(obj[k], depth+1); if(v) return v; }
+  return "";
+}
+async function hfErrText(res){ try{ var t = await res.text(); return t.slice(0, 240); }catch(e){ return ""; } }
+
+/* --- Text-to-image: POST router, response is image bytes --- */
+async function hfGenerateImage(modelId, prompt, negative){
+  var body = { inputs: prompt };
+  if(negative){ body.parameters = { negative_prompt: negative }; }
+  var lastErr = "";
+  for(var attempt=0; attempt<14; attempt++){
+    if(hfJob.cancelled) throw new Error("Cancelled");
+    hfJob.controller = ("AbortController" in window) ? new AbortController() : null;
+    var res = await fetch(hfModelUrl(modelId), { method:"POST", headers: hfHeaders({"Content-Type":"application/json"}), body: JSON.stringify(body), signal: hfJob.controller ? hfJob.controller.signal : undefined });
+    var ct = res.headers.get("content-type") || "";
+    if(res.ok && ct.indexOf("image") === 0){ return await res.blob(); }
+    if(res.status === 503 || res.status === 202){
+      var waitS = 8;
+      try{ var j = await res.json(); if(j.estimated_time) waitS = Math.min(30, Math.max(4, j.estimated_time)); }catch(e){}
+      hfProgUpdate(Math.min(90, 10 + attempt*7), "Model is warming up on Hugging Face — waiting ~" + Math.round(waitS) + "s (attempt " + (attempt+1) + ")…");
+      await hfSleep(waitS * 1000); continue;
+    }
+    lastErr = "Hugging Face " + res.status + ": " + (await hfErrText(res));
+    throw new Error(lastErr);
+  }
+  throw new Error("The image model did not warm up in time — try again in a moment. " + lastErr);
+}
+
+/* --- Text/Image-to-video: POST router; 202/503 means keep polling --- */
+async function hfGenerateVideo(modelId, prompt, imageDataUrl){
+  var body = { inputs: prompt };
+  if(imageDataUrl){ body.parameters = { image_url: imageDataUrl, image: imageDataUrl }; }
+  var started = Date.now();
+  for(var attempt=0; attempt<60; attempt++){
+    if(hfJob.cancelled) throw new Error("Cancelled");
+    hfJob.controller = ("AbortController" in window) ? new AbortController() : null;
+    var res;
+    try{
+      res = await fetch(hfModelUrl(modelId), { method:"POST", headers: hfHeaders({"Content-Type":"application/json"}), body: JSON.stringify(body), signal: hfJob.controller ? hfJob.controller.signal : undefined });
+    }catch(e){
+      if(hfJob.cancelled) throw new Error("Cancelled");
+      throw new Error("Network error calling Hugging Face: " + e.message);
+    }
+    var ct = res.headers.get("content-type") || "";
+    var elapsed = (Date.now() - started) / 1000;
+    if(res.ok && (ct.indexOf("video") === 0 || ct.indexOf("application/octet-stream") === 0)){
+      var blob = await res.blob();
+      if(blob.size > 0) return { blob: blob, url: "" };
+    }
+    if(res.ok && ct.indexOf("application/json") === 0){
+      var j = null; try{ j = await res.json(); }catch(e){}
+      var u = hfFindUrl(j, 0);
+      if(u) return { blob: null, url: u };
+      /* JSON without a URL yet (queued task) — keep polling */
+      hfProgUpdate(Math.min(92, 10 + elapsed/1.4), "Generation queued on Hugging Face — polling for the video URL… (" + Math.round(elapsed) + "s)");
+      await hfSleep(6000); continue;
+    }
+    if(res.status === 202 || res.status === 503 || res.status === 429){
+      var waitS2 = 6;
+      try{ var j2 = await res.json(); if(j2.estimated_time) waitS2 = Math.min(25, Math.max(5, j2.estimated_time)); }catch(e){}
+      hfProgUpdate(Math.min(92, 10 + elapsed/1.4), (res.status===503 ? "Model is warming up" : "Request accepted — generating") + " on Hugging Face… polling again in " + Math.round(waitS2) + "s (" + Math.round(elapsed) + "s elapsed)");
+      await hfSleep(waitS2 * 1000); continue;
+    }
+    throw new Error("Hugging Face " + res.status + ": " + (await hfErrText(res)));
+  }
+  throw new Error("Video generation timed out while polling Hugging Face — the model may be busy; try again or pick LTX-Video.");
+}
+
+/* --- Voice: character's own script only, via HF TTS --- */
+async function hfGenerateSpeech(text){
+  var errors = [];
+  for(var i=0;i<HF_TTS_MODELS.length;i++){
+    try{
+      var res = await fetch(hfModelUrl(HF_TTS_MODELS[i]), { method:"POST", headers: hfHeaders({"Content-Type":"application/json"}), body: JSON.stringify({ inputs: text }) });
+      var ct = res.headers.get("content-type") || "";
+      if(res.ok && ct.indexOf("json") < 0){ var b = await res.blob(); if(b.size > 100) return { blob: b, model: HF_TTS_MODELS[i] }; }
+      errors.push(HF_TTS_MODELS[i] + " → " + res.status + " " + (await hfErrText(res)));
+    }catch(e){ errors.push(HF_TTS_MODELS[i] + " → " + e.message); }
+  }
+  throw new Error(errors.join(" · "));
+}
+var hfAudioEl = null;
+function playAudioBlob(blob){
+  lastVoiceUrl = URL.createObjectURL(blob);
+  if(!hfAudioEl) hfAudioEl = new Audio();
+  hfAudioEl.src = lastVoiceUrl; hfAudioEl.play();
+  return lastVoiceUrl;
+}
+/* Speaks ONLY the speaking script. HF Kokoro when a token is set;
+   device voices are the labelled fallback. Never speaks prompts. */
+async function speakSmart(text, opts){
+  opts = opts || {};
+  if(!text || !text.trim()){ toast("Nothing to speak — the speaking script is empty"); return; }
+  if(hfHasToken()){
+    try{
+      toast("Generating the character’s voice on Hugging Face (Kokoro)…");
+      var r = await hfGenerateSpeech(text);
+      playAudioBlob(r.blob);
+      if(opts.onAudio) opts.onAudio(lastVoiceUrl, r.model);
+      return;
+    }catch(e){
+      toast("Hugging Face voice failed (" + String(e.message).slice(0,90) + ") — falling back to device voice");
+    }
+  }
+  speakText(text, opts);
+}
+
+/* --- Text AI: storyboard / concept / YouTube writing via chat models --- */
+async function hfChat(systemPrompt, userPrompt){
+  var errors = [];
+  for(var i=0;i<HF_CHAT_MODELS.length;i++){
+    try{
+      var res = await fetch(HF_ROUTER + "/v1/chat/completions", { method:"POST", headers: hfHeaders({"Content-Type":"application/json"}),
+        body: JSON.stringify({ model: HF_CHAT_MODELS[i], messages: [ { role:"system", content: systemPrompt }, { role:"user", content: userPrompt } ], max_tokens: 2200, temperature: 0.7 }) });
+      if(!res.ok){ errors.push(HF_CHAT_MODELS[i] + " → " + res.status + " " + (await hfErrText(res))); continue; }
+      var j = await res.json();
+      var content = j && j.choices && j.choices[0] && j.choices[0].message ? j.choices[0].message.content : "";
+      if(content) return { text: content, model: HF_CHAT_MODELS[i] };
+      errors.push(HF_CHAT_MODELS[i] + " → empty reply");
+    }catch(e){ errors.push(HF_CHAT_MODELS[i] + " → " + e.message); }
+  }
+  throw new Error(errors.join(" · "));
+}
+function hfParseJson(text){
+  if(!text) return null;
+  var t = String(text).replace(/```json/gi, "").replace(/```/g, "");
+  var a = t.indexOf("{"), b = t.lastIndexOf("}");
+  if(a < 0 || b <= a) return null;
+  try{ return JSON.parse(t.slice(a, b+1)); }catch(e){ return null; }
+}
+
+/* --- Settings wiring + status --- */
+function hfSetTestResult(ok, msg){
+  try{ localStorage.setItem(HF_TEST_KEY, JSON.stringify({ ok: ok, msg: msg, at: Date.now() })); }catch(e){}
+}
+function renderHfModelStatus(){
+  var el = $("hfModelStatus"); if(!el) return;
+  var has = hfHasToken();
+  var rows = [];
+  HF_IMG_MODELS.forEach(function(m){ rows.push({ t:"Image", id: m.id }); });
+  HF_T2V_MODELS.forEach(function(m){ rows.push({ t:"Text-to-video", id: m.id }); });
+  rows.push({ t:"Image-to-video", id:"Wan-AI/Wan2.2-I2V-A14B" });
+  HF_TTS_MODELS.forEach(function(m, i){ rows.push({ t:"Voice" + (i===0 ? "" : " (fallback)"), id: m }); });
+  HF_CHAT_MODELS.forEach(function(m, i){ rows.push({ t:"Text / storyboard" + (i===0 ? "" : " (fallback)"), id: m }); });
+  el.innerHTML = rows.map(function(r){
+    return '<div class="hfstat"><span class="dot ' + (has ? "on" : "off") + '"></span><span class="hm">' + esc(r.t) + '<div class="mid">' + esc(r.id) + '</div></span><span class="hs">' + (has ? "Ready — token set" : "Needs token") + '</span></div>';
+  }).join("");
+}
+function refreshHfUI(){
+  var has = hfHasToken();
+  var tag = $("hfTag");
+  if(tag){ tag.textContent = has ? "Connected" : "No token"; tag.className = "tag " + (has ? "green" : "red"); tag.style.marginLeft = "6px"; }
+  var sl = $("hfStatusLine");
+  if(sl) sl.textContent = has ? "Token saved in this browser — generation is live on Hugging Face models." : "No token saved yet — generation buttons will ask for one.";
+  var tr = $("hfTestResult"), lt = hfLastTest();
+  if(tr) tr.textContent = lt ? ("Last test " + fmtDate(lt.at) + ": " + lt.msg) : "Not tested yet — press “Test connection”.";
+  var inp = $("hfTokenInput");
+  if(inp && document.activeElement !== inp) inp.value = hfToken();
+  var note = $("hfSideNote");
+  if(note) note.innerHTML = has
+    ? '<span style="color:var(--green)">●</span> Hugging Face <strong style="color:var(--ink2)">connected</strong> — images, video, voices &amp; text run on HF models.'
+    : '<span style="color:var(--red)">●</span> Hugging Face not connected — add your token in <strong style="color:var(--ink2)">Settings</strong> to generate real images &amp; videos.';
+  var cn = $("composerNote");
+  if(cn) cn.textContent = has
+    ? "Hugging Face connected — the composer generates real images & videos with FLUX, Wan, LTX and more. First calls can take a minute while a model warms up."
+    : "Add your Hugging Face token in Settings to generate real images & videos — no token, no generation, nothing faked.";
+  var veh = $("voEngineHint");
+  if(veh) veh.textContent = has
+    ? "Voice engine: Hugging Face Kokoro-82M (SpeechT5 fallback) — generated audio can be played and downloaded below."
+    : "Voice engine: device voices (fallback — add a Hugging Face token in Settings for Kokoro AI voices you can download).";
+  var notice = $("hfTokenNotice");
+  if(notice && has) notice.style.display = "none";
+  renderHfModelStatus();
+}
+$("btnHfSave").addEventListener("click", function(){
+  var v = $("hfTokenInput").value.trim();
+  if(!v){ toast("Paste your Hugging Face token first (starts with hf_)"); return; }
+  try{ localStorage.setItem(HF_TOKEN_KEY, v); }catch(e){ toast("Could not save the token in this browser"); return; }
+  refreshHfUI(); toast("Hugging Face token saved — generation is live");
+});
+$("btnHfClear").addEventListener("click", function(){
+  try{ localStorage.removeItem(HF_TOKEN_KEY); localStorage.removeItem(HF_TEST_KEY); }catch(e){}
+  $("hfTokenInput").value = ""; refreshHfUI(); toast("Hugging Face token removed from this browser");
+});
+$("btnHfTest").addEventListener("click", async function(){
+  if(!hfHasToken()){ toast("Save a token first, then test the connection"); return; }
+  var btn = this; btn.disabled = true; btn.textContent = "Testing…";
+  try{
+    var res = await fetch("https://huggingface.co/api/whoami-v2", { headers: hfHeaders() });
+    if(res.ok){ var j = await res.json(); hfSetTestResult(true, "Connected as " + (j.name || "Hugging Face user") + " — token works."); toast("Hugging Face connection OK"); }
+    else { hfSetTestResult(false, "Token rejected (HTTP " + res.status + ") — check the token and try again."); toast("Hugging Face rejected the token (HTTP " + res.status + ")"); }
+  }catch(e){ hfSetTestResult(false, "Network error: " + e.message); toast("Could not reach Hugging Face: " + e.message); }
+  btn.disabled = false; btn.textContent = "Test connection";
+  refreshHfUI();
+});
+$("btnHfGoSettings").addEventListener("click", function(){ goto("settings"); });
 
 /* ---------------- Navigation ---------------- */
 var NAV_VIEWS = ["media","characters","scenes","library","tools","bin"];
@@ -1380,7 +1702,7 @@ function mediaMatches(m){
   if(f.type.length && f.type.indexOf(m.type) < 0) return false;
   if(f.ratio.length && f.ratio.indexOf(m.ratio) < 0) return false;
   if(f.res.length && f.res.indexOf(m.res) < 0) return false;
-  if(f.status.length && f.status.indexOf(m.status) < 0) return false;
+  if(f.status.length && !f.status.some(function(s){ return String(m.status).indexOf(s) === 0; })) return false;
   if(f.dur.length && f.dur.indexOf(String(m.dur)) < 0) return false;
   if(f.origin.length){
     var ok = false;
@@ -1418,15 +1740,19 @@ function mediaCardHTML(m){
   var thumbStyle = m.img ? 'background-image:url(' + m.img + ')' : 'background-image:' + gradFor(m.prompt + m.id);
   var chip = m.type==="video" ? "▶ " + (m.dur||8) + "s · " + esc(m.res||"720p") : "▣ Image";
   if(m.origin==="upload") chip = "▣ Upload";
+  var statusCls = m.status==="Local file" ? " local" : (String(m.status).indexOf("Generated")===0 ? " ok" : "");
   return '<article class="mcard">'
-    + '<div class="mthumb" style="'+thumbStyle+'"><span class="chip">'+chip+'</span>'
+    + '<div class="mthumb" style="'+thumbStyle+'">'
+    + (m.type==="video" && m.videoUrl ? '<video src="'+esc(m.videoUrl)+'" controls preload="metadata" playsinline></video>' : '')
+    + '<span class="chip">'+chip+'</span>'
     + '<button class="fav'+(m.fav?" on":"")+'" data-fav="'+m.id+'" title="Favourite" aria-label="Favourite">'+(m.fav?"★":"☆")+'</button></div>'
     + '<div class="mbody"><div class="mprompt">'+esc(m.prompt)+'</div>'
     + (m.script ? '<div class="mprompt" style="color:var(--muted)">Character says: “'+esc(m.script)+'”</div>' : '')
     + '<div class="mmeta">'+esc(m.model||"")+' · '+esc(m.ratio||"")+' · '+fmtDate(m.at)+'</div>'
-    + '<div><span class="status'+(m.status==="Local file"?" local":"")+'">'+esc(m.status)+'</span></div>'
+    + '<div><span class="status'+statusCls+'">'+esc(m.status)+'</span></div>'
     + '<div class="mrow">'
     + (m.script ? '<button class="btn small" data-speak="'+m.id+'">▶ Hear line</button>' : '')
+    + ((m.type==="video" && m.videoUrl) || (m.type==="image" && m.img) ? '<button class="btn small" data-download="'+m.id+'">Download</button>' : '')
     + '<button class="btn small" data-copy="'+m.id+'">Copy prompt</button>'
     + '<button class="btn small" data-toscene="'+m.id+'">Add as scene</button>'
     + '<button class="btn small danger" data-bin="'+m.id+'">Bin</button>'
@@ -1437,7 +1763,14 @@ function bindMediaCards(root){
     var m = state.media.find(function(x){ return x.id===b.dataset.fav; }); if(m){ m.fav = !m.fav; save(); renderMedia(); if(currentView==="library") renderLibrary(); }
   }); });
   root.querySelectorAll("[data-speak]").forEach(function(b){ b.addEventListener("click", function(){
-    var m = state.media.find(function(x){ return x.id===b.dataset.speak; }); if(m && m.script) speakText(m.script, { type: m.voiceType || "female" });
+    var m = state.media.find(function(x){ return x.id===b.dataset.speak; }); if(m && m.script) speakSmart(m.script, { type: m.voiceType || "female" });
+  }); });
+  root.querySelectorAll("[data-download]").forEach(function(b){ b.addEventListener("click", function(){
+    var m = state.media.find(function(x){ return x.id===b.dataset.download; }); if(!m) return;
+    var a = document.createElement("a");
+    a.href = m.type==="video" ? m.videoUrl : m.img;
+    a.download = "autoflow-" + m.type + "-" + m.id.slice(-6) + (m.type==="video" ? ".mp4" : ".png");
+    document.body.appendChild(a); a.click(); a.remove();
   }); });
   root.querySelectorAll("[data-copy]").forEach(function(b){ b.addEventListener("click", function(){
     var m = state.media.find(function(x){ return x.id===b.dataset.copy; }); if(m) copyText(m.prompt, "Prompt copied");
@@ -1530,8 +1863,13 @@ function sceneCardHTML(s){
     + '<button class="btn small" data-sact="down">↓ Down</button>'
     + '<button class="btn small" data-sact="regen">Regenerate scene</button>'
     + '<button class="btn small" data-sact="speak">▶ Speak line</button>'
+    + '<button class="btn small primary" data-sgen="img">Generate image · HF</button>'
+    + '<button class="btn small primary" data-sgen="vid">Generate video · HF</button>'
     + '<button class="btn small danger" data-sact="del">Delete</button>'
-    + '</div></div>';
+    + '</div>'
+    + (s.genImg ? '<div class="scene-gen"><img src="'+s.genImg+'" alt="Generated still for scene '+s.n+'"></div>' : '')
+    + (s.genVideo ? '<div class="scene-gen"><video src="'+esc(s.genVideo)+'" controls preload="metadata" playsinline></video></div>' : '')
+    + '</div>';
   function fld(label, inner, full){ return '<div class="'+(full?"full":"")+'"><div class="fl">'+label+'</div>'+inner+'</div>'; }
 }
 function bindSceneCards(root, project, rerender){
@@ -1556,9 +1894,44 @@ function bindSceneCards(root, project, rerender){
           ["title","desc","imgPrompt","vidPrompt","camera","lighting","voice","sfx"].forEach(function(k){ s[k] = fresh[k]; });
           toast("Scene " + s.n + " regenerated");
         }
-        if(act==="speak"){ if(s.voice && s.voice.trim()) speakText(s.voice, {}); else toast("This scene has no speaking line"); return; }
+        if(act==="speak"){ if(s.voice && s.voice.trim()) speakSmart(s.voice, {}); else toast("This scene has no speaking line"); return; }
         project.scenes.forEach(function(x,i){ x.n = i+1; });
         touch(project); save(); refreshChrome(); rerender(true);
+      });
+    });
+    card.querySelectorAll("[data-sgen]").forEach(function(b){
+      b.addEventListener("click", async function(){
+        var kind = b.dataset.sgen;
+        if(!hfRequireToken(kind==="img" ? "generate scene images" : "generate scene videos")) return;
+        b.disabled = true;
+        try{
+          if(kind==="img"){
+            hfProgShow("Scene " + s.n + " image — " + hfShortName(cs.imageModel));
+            hfProgUpdate(12, "Sending the scene image prompt to Hugging Face…");
+            var blob = await hfGenerateImage(cs.imageModel, s.imgPrompt || s.desc || s.title, "");
+            s.genImg = await blobToDataURL(blob);
+            state.media.unshift({ id: uid(), projectId: project.id, type: "image", prompt: s.imgPrompt || s.title, script: "", voice: "", voiceType: "", model: cs.imageModel, res: "—", dur: 0, ratio: "16:9", origin: "generated", status: "Generated · Hugging Face", img: s.genImg, videoUrl: "", fav: false, at: Date.now() });
+            state.renders.unshift({ id: uid(), title: "Scene " + s.n + " image: " + s.title, type: "Text-to-Image", project: project.name, status: "Generated · Hugging Face", at: Date.now(), brief: s.imgPrompt || "" });
+            hfProgUpdate(100, "Scene image saved");
+            toast("Scene " + s.n + " image generated on Hugging Face");
+          } else {
+            var useI2V = !!s.genImg;
+            var modelId = useI2V ? cs.i2vModel : cs.videoModel;
+            hfProgShow("Scene " + s.n + " video — " + hfShortName(modelId));
+            hfProgUpdate(8, (useI2V ? "Animating the scene’s generated still" : "Sending the scene video prompt") + " to Hugging Face…");
+            var result = await hfGenerateVideo(modelId, s.vidPrompt || s.desc || s.title, useI2V ? s.genImg : "");
+            var vUrl = result.url || "";
+            if(result.blob){ if(result.blob.size <= 3500000){ try{ vUrl = await blobToDataURL(result.blob); }catch(e){ vUrl = URL.createObjectURL(result.blob); } } else vUrl = URL.createObjectURL(result.blob); }
+            s.genVideo = vUrl;
+            state.media.unshift({ id: uid(), projectId: project.id, type: "video", prompt: s.vidPrompt || s.title, script: s.voice || "", voice: "", voiceType: "", model: modelId, res: cs.res, dur: Math.min(8, Math.max(4, +s.duration || 5)), ratio: "16:9", origin: "generated", status: "Generated · Hugging Face", img: s.genImg || "", videoUrl: vUrl, fav: false, at: Date.now() });
+            state.renders.unshift({ id: uid(), title: "Scene " + s.n + " video: " + s.title, type: useI2V ? "Image-to-Video" : "Text-to-Video", project: project.name, status: "Generated · Hugging Face", at: Date.now(), brief: s.vidPrompt || "" });
+            hfProgUpdate(100, "Scene video saved");
+            toast("Scene " + s.n + " video generated on Hugging Face");
+          }
+          touch(project); save(); refreshChrome(); rerender(true);
+        }catch(e){
+          toast(String(e.message) === "Cancelled" ? "Generation cancelled" : "Hugging Face generation failed: " + String(e.message).slice(0,140));
+        }finally{ hfProgHide(); b.disabled = false; }
       });
     });
   });
@@ -1620,9 +1993,9 @@ var TOOLS = [
   { view:"editor", name:"Video Editor", desc:"Multi-track timeline — trim, split, reorder, preview, and export a real WebM.", icon:'<circle cx="6.5" cy="6.5" r="2.5"/><circle cx="6.5" cy="17.5" r="2.5"/><path d="M8.3 8.2 20 19M8.3 15.8 20 5"/>' },
   { view:"youtube", name:"YouTube Studio", desc:"SEO title, description, chapters, hashtags, keywords and a thumbnail concept.", icon:'<rect x="3" y="6" width="18" height="12.5" rx="3.5"/><path d="M10.2 9.7v5L14.8 12.2Z" fill="currentColor" stroke="none"/>' },
   { view:"templates", name:"Templates", desc:"Proven structures — launch films, product stories, presenter explainers, travel films.", icon:'<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>' },
-  { view:"settings", name:"Settings & Providers", desc:"Veo, Runway, ElevenLabs and image provider status, the render queue, and backups.", icon:'<circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/>' }
+  { view:"settings", name:"Settings & Providers", desc:"Hugging Face token, per-model status, the generation queue, and backups.", icon:'<circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/>' }
 ];
-var WF = [["1","Enter topic","Type the idea, product or car."],["2","Select style","Camera, lighting, cinematic style."],["3","Generate storyboard","A scene-by-scene plan, written locally."],["4","Review & edit scenes","Edit, regenerate, reorder scenes."],["5","Generate images","Prompt sets now; renders need a provider."],["6","Generate videos","Queued as Needs provider until Veo/Runway connect."],["7","Generate voiceover","Character speaks its own script (device voices)."],["8","Arrange in editor","Multi-track timeline, trim & split."],["9","Export","WebM timeline export, or full render via provider."]];
+var WF = [["1","Enter topic","Type the idea, product or car."],["2","Select style","Camera, lighting, cinematic style."],["3","Generate storyboard","A scene-by-scene plan, written locally."],["4","Review & edit scenes","Edit, regenerate, reorder scenes."],["5","Generate images","Real renders on Hugging Face FLUX models."],["6","Generate videos","Real renders on Hugging Face Wan / LTX / Hunyuan models."],["7","Generate voiceover","Character speaks its own script (HF Kokoro, device-voice fallback)."],["8","Arrange in editor","Multi-track timeline, trim & split."],["9","Export","WebM timeline export, or full render via provider."]];
 function renderTools(){
   $("toolGrid").innerHTML = TOOLS.map(function(t){
     return '<button class="tooltile" data-tool="'+t.view+'"><span class="tic"><span class="icn"><svg viewBox="0 0 24 24">'+t.icon+'</svg></span></span><h3>'+t.name+'</h3><p>'+t.desc+'</p></button>';
@@ -1669,11 +2042,14 @@ $("btnBinEmpty").addEventListener("click", function(){
 });
 
 /* ---------------- Composer ---------------- */
-var cs = { mode:"video", source:"frames", videoModel:"Veo 3.1 - Fast", imageModel:"Imagen 4", res:"720p", dur:8, ratio:"16:9", count:1 };
+var cs = { mode:"video", source:"frames", videoModel:"Wan-AI/Wan2.1-T2V-14B", i2vModel:"Wan-AI/Wan2.2-I2V-A14B", imageModel:"black-forest-labs/FLUX.1-schnell", res:"720p", dur:8, ratio:"16:9", count:1 };
 var selectedVoice = null; /* VOICES entry or null */
 var composerImage = "";   /* attached first-frame / ingredient image (data URL) */
+function hfShortName(id){ return String(id || "").split("/").pop(); }
 function chipLabel(){
-  return cs.mode==="video" ? ("Video · " + cs.res + " · " + cs.dur + "s") : ("Image · " + cs.imageModel);
+  if(cs.mode==="image") return "Image · " + hfShortName(cs.imageModel);
+  if(composerImage) return "Image-to-Video · " + hfShortName(cs.i2vModel) + " · " + cs.dur + "s";
+  return "Video · " + hfShortName(cs.videoModel) + " · " + cs.res + " · " + cs.dur + "s";
 }
 function refreshChip(){
   $("chipText").textContent = chipLabel();
@@ -1703,7 +2079,7 @@ function scriptFitUpdate(){
 $("btnSpeakComposer").addEventListener("click", function(){
   var sc = $("composerScript").value.trim();
   if(!sc){ toast("The speaking script is empty — nothing to speak. The visual prompt is never spoken."); return; }
-  speakText(sc, { type: selectedVoice ? selectedVoice.type : "female" });
+  speakSmart(sc, { type: selectedVoice ? selectedVoice.type : "female" });
 });
 $("voiceChipX").addEventListener("click", function(){ setVoice(null); });
 function setVoice(v){
@@ -1722,18 +2098,20 @@ function renderModelPop(){
   $("mpResRow").querySelectorAll("[data-res]").forEach(function(b){ b.classList.toggle("on", b.dataset.res===cs.res); });
   $("mpDurRow").querySelectorAll("[data-dur]").forEach(function(b){ b.classList.toggle("on", +b.dataset.dur===cs.dur); });
   $("mpCountRow").querySelectorAll("[data-count]").forEach(function(b){ b.classList.toggle("on", +b.dataset.count===cs.count); });
-  var models = cs.mode==="video" ? VIDEO_MODELS : IMAGE_MODELS;
-  var current = cs.mode==="video" ? cs.videoModel : cs.imageModel;
-  $("mpModels").innerHTML = models.map(function(m){
-    return '<button class="mp-model'+(m.name===current?" on":"")+'" data-model="'+esc(m.name)+'">'+esc(m.name)+(m.sub?'<span class="sub">'+esc(m.sub)+'</span>':'')+'</button>';
+  var isI2V = cs.mode==="video" && !!composerImage;
+  var models = cs.mode==="video" ? (isI2V ? HF_I2V_MODELS : HF_T2V_MODELS) : HF_IMG_MODELS;
+  var current = cs.mode==="video" ? (isI2V ? cs.i2vModel : cs.videoModel) : cs.imageModel;
+  $("mpModels").innerHTML = (isI2V ? '<div class="hint" style="padding:2px 12px 6px">An image is attached — it becomes the first frame (image-to-video models).</div>' : "")
+    + models.map(function(m){
+    return '<button class="mp-model'+(m.id===current?" on":"")+'" data-model="'+esc(m.id)+'">'+esc(m.name)+(m.sub?'<span class="sub" style="color:var(--muted)">'+esc(m.sub)+'</span>':'')+'<span class="sub" style="color:var(--faint)">'+esc(m.id)+'</span></button>';
   }).join("");
   $("mpModels").querySelectorAll("[data-model]").forEach(function(b){ b.addEventListener("click", function(){
-    if(cs.mode==="video") cs.videoModel = b.dataset.model; else cs.imageModel = b.dataset.model;
+    if(cs.mode==="video"){ if(isI2V) cs.i2vModel = b.dataset.model; else cs.videoModel = b.dataset.model; } else cs.imageModel = b.dataset.model;
     renderModelPop(); refreshChip();
   }); });
-  $("mpCredits").innerHTML = cs.mode==="video"
-    ? "Veo / Runway are <strong>not connected</strong> — generating records a <strong>Needs provider</strong> request. Nothing is faked."
-    : "Imagen is <strong>not connected</strong> — generating records a <strong>Needs provider</strong> request with the full prompt set.";
+  $("mpCredits").innerHTML = hfHasToken()
+    ? "Hugging Face <strong style='color:var(--green)'>connected</strong> — generation runs on the selected HF model via Inference Providers (pay-as-you-go / PRO credits)."
+    : "Hugging Face token <strong>needed</strong> — add it in <strong>Settings</strong> to generate. No token, no generation, nothing faked.";
 }
 $("mpTabImage").addEventListener("click", function(){ cs.mode = "image"; renderModelPop(); refreshChip(); });
 $("mpTabVideo").addEventListener("click", function(){ cs.mode = "video"; renderModelPop(); refreshChip(); });
@@ -1744,31 +2122,66 @@ $("mpResRow").querySelectorAll("[data-res]").forEach(function(b){ b.addEventList
 $("mpDurRow").querySelectorAll("[data-dur]").forEach(function(b){ b.addEventListener("click", function(){ cs.dur = +b.dataset.dur; renderModelPop(); refreshChip(); scriptFitUpdate(); }); });
 $("mpCountRow").querySelectorAll("[data-count]").forEach(function(b){ b.addEventListener("click", function(){ cs.count = +b.dataset.count; renderModelPop(); refreshChip(); }); });
 
-$("btnSend").addEventListener("click", function(){
+$("btnSend").addEventListener("click", async function(){
   var p = activeProject();
   if(!p){ toast("Create a project first"); openNewProject(); return; }
   var prompt = $("composerInput").value.trim();
   if(!prompt && !composerImage){ toast("Describe what you want to create — or attach an image with +"); return; }
+  if(!hfRequireToken(cs.mode==="video" ? "generate videos" : "generate images")) return;
   if(!prompt) prompt = cs.source==="ingredients" ? "Video built from the attached ingredient image" : "Video from the attached first frame";
   var script = $("composerScript").value.trim();
-  var made = 0;
-  for(var i=0;i<cs.count;i++){
-    var item = { id: uid(), projectId: p.id,
-      type: cs.mode, prompt: prompt, script: cs.mode==="video" ? script : "",
-      voice: selectedVoice ? selectedVoice.name : "", voiceType: selectedVoice ? selectedVoice.type : "",
-      model: cs.mode==="video" ? cs.videoModel : cs.imageModel,
-      res: cs.mode==="video" ? cs.res : "—", dur: cs.mode==="video" ? cs.dur : 0,
-      ratio: cs.ratio, origin: "generated", status: "Needs provider",
-      img: composerImage || "", fav: false, at: Date.now() + i };
-    state.media.unshift(item);
-    state.renders.unshift({ id: uid(), title: (cs.mode==="video" ? "Video" : "Image") + ": " + prompt.slice(0,60) + "…", type: cs.mode==="video" ? (cs.source==="ingredients" ? "Ingredients-to-Video" : "Text-to-Video") : "Text-to-Image", project: p.name, status: "Needs provider", at: Date.now() + i,
-      brief: prompt + (script ? "\nSPEAKING SCRIPT (character speaks this itself): " + script : "") + "\nMODEL: " + item.model + " · " + item.ratio + (cs.mode==="video" ? " · " + item.res + " · " + item.dur + "s" : "") });
-    made++;
-  }
-  save(); refreshChrome();
-  $("composerInput").value = ""; autoGrow($("composerInput")); updateSendState();
+  var btn = this; btn.disabled = true;
   closeAllPops(null); goto("media");
-  toast(made + (cs.mode==="video" ? " video" : " image") + " request" + (made>1?"s":"") + " recorded as “Needs provider” — connect a provider in Settings to render");
+  try{
+    if(cs.mode==="image"){
+      for(var i=0;i<cs.count;i++){
+        hfProgShow("Generating image " + (i+1) + " of " + cs.count + " — " + hfShortName(cs.imageModel));
+        hfProgUpdate(12, "Sending prompt to Hugging Face (" + cs.imageModel + ")…");
+        var blob = await hfGenerateImage(cs.imageModel, prompt, "");
+        var dataUrl = await blobToDataURL(blob);
+        state.media.unshift({ id: uid(), projectId: p.id, type: "image", prompt: prompt, script: "",
+          voice: "", voiceType: "", model: cs.imageModel, res: "—", dur: 0, ratio: cs.ratio,
+          origin: "generated", status: "Generated · Hugging Face", img: dataUrl, videoUrl: "", fav: false, at: Date.now() });
+        state.renders.unshift({ id: uid(), title: "Image: " + prompt.slice(0,60) + "…", type: "Text-to-Image", project: p.name, status: "Generated · Hugging Face", at: Date.now(), brief: prompt + "\nMODEL: " + cs.imageModel });
+        save(); refreshChrome(); renderMedia();
+        hfProgUpdate(100, "Image saved to All media");
+      }
+      toast(cs.count + " image" + (cs.count>1?"s":"") + " generated on Hugging Face — see All media");
+    } else {
+      var isI2V = !!composerImage;
+      var modelId = isI2V ? cs.i2vModel : cs.videoModel;
+      for(var v=0; v<cs.count; v++){
+        hfProgShow((isI2V ? "Image-to-video" : "Text-to-video") + (cs.count>1 ? " " + (v+1) + "/" + cs.count : "") + " — " + hfShortName(modelId));
+        hfProgUpdate(8, "Sending " + (isI2V ? "first frame + prompt" : "prompt") + " to Hugging Face (" + modelId + ") · " + cs.dur + "s · " + cs.res + "…");
+        var result = await hfGenerateVideo(modelId, prompt, isI2V ? composerImage : "");
+        var videoUrl = result.url || "";
+        var sessionOnly = false;
+        if(result.blob){
+          if(result.blob.size <= 3500000){ try{ videoUrl = await blobToDataURL(result.blob); }catch(e){ videoUrl = URL.createObjectURL(result.blob); sessionOnly = true; } }
+          else { videoUrl = URL.createObjectURL(result.blob); sessionOnly = true; }
+        }
+        state.media.unshift({ id: uid(), projectId: p.id, type: "video", prompt: prompt, script: script,
+          voice: selectedVoice ? selectedVoice.name : "", voiceType: selectedVoice ? selectedVoice.type : "",
+          model: modelId, res: cs.res, dur: cs.dur, ratio: cs.ratio,
+          origin: "generated", status: "Generated · Hugging Face" + (sessionOnly ? " (this session)" : ""), img: isI2V ? composerImage : "", videoUrl: videoUrl, fav: false, at: Date.now() });
+        state.renders.unshift({ id: uid(), title: "Video: " + prompt.slice(0,60) + "…", type: isI2V ? "Image-to-Video" : "Text-to-Video", project: p.name, status: "Generated · Hugging Face", at: Date.now(),
+          brief: prompt + (script ? "\nSPEAKING SCRIPT (character speaks this itself): " + script : "") + "\nMODEL: " + modelId + " · " + cs.ratio + " · " + cs.res + " · " + cs.dur + "s" });
+        save(); refreshChrome(); renderMedia();
+        hfProgUpdate(100, "Video saved to All media");
+      }
+      toast("Video generated on Hugging Face — see All media");
+    }
+    $("composerInput").value = ""; autoGrow($("composerInput")); updateSendState();
+  }catch(e){
+    if(String(e.message) === "Cancelled"){ toast("Generation cancelled"); }
+    else {
+      state.renders.unshift({ id: uid(), title: (cs.mode==="video" ? "Video" : "Image") + ": " + prompt.slice(0,60) + "…", type: cs.mode==="video" ? "Text-to-Video" : "Text-to-Image", project: p.name, status: "Failed — " + String(e.message).slice(0,80), at: Date.now(), brief: prompt });
+      save(); refreshChrome();
+      toast("Hugging Face generation failed: " + String(e.message).slice(0,140));
+    }
+  }finally{
+    hfProgHide(); btn.disabled = false;
+  }
 });
 
 /* ---------------- Asset picker ---------------- */
@@ -1825,7 +2238,7 @@ function renderPicker(){
   }); });
   main.querySelectorAll("[data-pkasset]").forEach(function(b){ b.addEventListener("click", function(){
     var a = state.assets.find(function(x){ return x.id===b.dataset.pkasset; }); if(!a) return;
-    if(a.img){ composerImage = a.img; cs.source = "frames"; toast("Image attached as the first frame / ingredient"); }
+    if(a.img){ composerImage = a.img; cs.source = "frames"; refreshChip(); toast("Image attached as the first frame / ingredient"); }
     var inp = $("composerInput");
     if(!a.img){ inp.value = (inp.value ? inp.value.replace(/\s+$/,"") + " " : "") + a.desc; autoGrow(inp); updateSendState(); }
     closeAllPops(null); inp.focus();
@@ -1845,7 +2258,7 @@ function renderPkVoices(main){
     + '<div><div style="font-size:13px;font-weight:700">Customise performance</div>'
     + '<textarea id="pkPerf" placeholder="Describe the voice performance style…" style="min-height:52px;margin-top:6px"></textarea></div>'
     + '<button class="btn primary" id="pkAddVoice" style="width:100%">Add to prompt</button>'
-    + '<div class="hint">Preview uses your device’s built-in voices. Studio voices (ElevenLabs) plug in via Settings.</div>'
+    + '<div class="hint">Preview uses your device’s built-in voices. When a Hugging Face token is set (Settings), the character’s lines are generated by Kokoro-82M instead.</div>'
     + '</div></div>';
   main.querySelectorAll("[data-voice]").forEach(function(b){ b.addEventListener("click", function(){ pkVoiceSel = +b.dataset.voice; renderPicker(); }); });
   $("pkSample").addEventListener("input", function(){ $("pkSampleCount").textContent = this.value.length + " / 120"; });
@@ -1898,13 +2311,41 @@ function renderStoryboard(){
   if($("sbTopic").value === "" && p.topic) $("sbTopic").value = p.topic;
   fillSceneList(list, p, function(){ renderStoryboard(); });
 }
-$("btnSbGenerate").addEventListener("click", function(){
+$("btnSbGenerate").addEventListener("click", async function(){
   var p = activeProject(); if(!p){ toast("Create a project first"); return; }
   var topic = $("sbTopic").value.trim() || p.topic || p.name;
-  p.topic = topic; p.concept = storyboardConcept(topic);
-  p.scenes = buildStoryboard(topic, +$("sbScenes").value);
-  p.timeline = null; touch(p); save(); refreshChrome(); renderStoryboard();
-  toast("Storyboard generated — " + p.scenes.length + " scenes");
+  var count = +$("sbScenes").value;
+  var btn = this;
+  function applyTemplate(note){
+    p.topic = topic; p.concept = storyboardConcept(topic);
+    p.scenes = buildStoryboard(topic, count);
+    p.timeline = null; touch(p); save(); refreshChrome(); renderStoryboard();
+    toast(note);
+  }
+  if(!hfHasToken()){ applyTemplate("No Hugging Face token — storyboard built with built-in templates. Add a token in Settings for AI-written storyboards."); return; }
+  btn.disabled = true;
+  hfProgShow("Writing storyboard — Llama 3.3 70B");
+  hfProgUpdate(25, "Asking the Hugging Face chat model to write " + count + " scenes about: " + topic.slice(0,60) + "…");
+  try{
+    var r = await hfChat(
+      "You are a professional film storyboard writer. Reply with ONLY valid JSON, no markdown, in exactly this shape: {\"concept\":\"...\",\"scenes\":[{\"title\":\"...\",\"desc\":\"...\",\"imgPrompt\":\"...\",\"vidPrompt\":\"...\",\"camera\":\"...\",\"lighting\":\"...\",\"duration\":5,\"voice\":\"...\",\"sfx\":\"...\"}]}. The voice field is the exact line the on-screen character speaks itself (never a narrator). Keep characters, objects and environments identical across all scenes and say so inside the prompts.",
+      "Write a " + count + "-scene cinematic storyboard about: " + topic + ". Project name: " + p.name + ".");
+    hfProgUpdate(80, "Storyboard received from " + hfShortName(r.model) + " — building scenes…");
+    var parsed = hfParseJson(r.text);
+    if(!parsed || !Array.isArray(parsed.scenes) || !parsed.scenes.length) throw new Error("The model reply could not be parsed as a storyboard");
+    p.topic = topic;
+    p.concept = parsed.concept || storyboardConcept(topic);
+    p.scenes = parsed.scenes.slice(0, count).map(function(s, i){
+      return { id: uid()+i, n: i+1, title: s.title || ("Scene " + (i+1)), desc: s.desc || "",
+        imgPrompt: s.imgPrompt || "", vidPrompt: s.vidPrompt || "",
+        camera: s.camera || "Wide Shot", lighting: s.lighting || "Soft warm ambient",
+        duration: Math.min(12, Math.max(2, +s.duration || 5)), voice: s.voice || "", sfx: s.sfx || "" };
+    });
+    p.timeline = null; touch(p); save(); refreshChrome(); renderStoryboard();
+    toast("Storyboard written by " + r.model + " — " + p.scenes.length + " scenes");
+  }catch(e){
+    applyTemplate("Hugging Face text AI failed (" + String(e.message).slice(0,90) + ") — fell back to built-in templates.");
+  }finally{ hfProgHide(); btn.disabled = false; }
 });
 $("sbConcept").addEventListener("change", function(){ var p = activeProject(); if(p){ p.concept = this.value; touch(p); save(); } });
 $("btnSbAdd").addEventListener("click", function(){
@@ -1950,7 +2391,7 @@ $("btnCarGenerate").addEventListener("click", function(){
 });
 $("btnCarSpeak").addEventListener("click", function(){
   var t = $("carScriptOut").textContent.trim();
-  if(t && t.indexOf("Generate the plan")!==0) speakText(t, {}); else toast("Generate the plan first");
+  if(t && t.indexOf("Generate the plan")!==0) speakSmart(t, {}); else toast("Generate the plan first");
 });
 $("btnCarStop").addEventListener("click", function(){ if("speechSynthesis" in window) speechSynthesis.cancel(); });
 $("btnCarCopyScript").addEventListener("click", function(){ copyText($("carScriptOut").textContent, "Script copied"); });
@@ -1974,27 +2415,50 @@ function buildImageSet(){
   }
   return out;
 }
-$("btnImgGenerate").addEventListener("click", function(){
-  var set = buildImageSet(); if(!set.length) return;
+function renderImgPromptSet(set){
   $("imgOut").innerHTML = set.map(function(v){
     return '<div style="border:1px solid var(--line);border-radius:10px;padding:13px 14px;margin-bottom:10px"><div style="font-weight:800;margin-bottom:5px">'+esc(v.title)+'</div><div style="font-size:13.5px;color:var(--ink2)">'+esc(v.prompt)+'</div><button class="btn small" style="margin-top:9px" data-copy="'+esc(v.prompt)+'">Copy prompt</button><button class="btn small" style="margin-top:9px;margin-left:6px" data-tocomposer="'+esc(v.prompt)+'">Send to composer</button></div>';
   }).join("");
   $("imgOut").querySelectorAll("[data-copy]").forEach(function(b){ b.addEventListener("click", function(){ copyText(b.dataset.copy, "Prompt copied"); }); });
   $("imgOut").querySelectorAll("[data-tocomposer]").forEach(function(b){ b.addEventListener("click", function(){
-    cs.mode = "image"; refreshChip();
+    cs.mode = "image"; cs.imageModel = $("imgModel").value; refreshChip();
     var inp = $("composerInput"); inp.value = b.dataset.tocomposer; autoGrow(inp); updateSendState();
-    goto("media"); inp.focus(); toast("Prompt loaded in the composer — press → to queue it");
+    goto("media"); inp.focus(); toast("Prompt loaded in the composer — press → to generate it on Hugging Face");
   }); });
-  toast("Variation set built — " + set.length + " prompts");
+}
+$("btnImgGenerate").addEventListener("click", async function(){
+  var set = buildImageSet(); if(!set.length) return;
+  if(!hfRequireToken("generate images")) return;
+  var p = activeProject(); if(!p){ toast("Create a project first"); return; }
+  var modelId = $("imgModel").value, neg = $("imgNegative").value.trim();
+  var btn = this; btn.disabled = true;
+  var results = [];
+  try{
+    for(var i=0;i<set.length;i++){
+      hfProgShow("Generating " + set[i].title + " — " + hfShortName(modelId));
+      hfProgUpdate(12, "Sending variation prompt to Hugging Face…");
+      var blob = await hfGenerateImage(modelId, set[i].prompt, neg);
+      var dataUrl = await blobToDataURL(blob);
+      results.push({ v: set[i], img: dataUrl });
+      state.media.unshift({ id: uid(), projectId: p.id, type: "image", prompt: set[i].prompt, script: "", voice: "", voiceType: "", model: modelId, res: "—", dur: 0, ratio: $("imgRatio").value, origin: "generated", status: "Generated · Hugging Face", img: dataUrl, videoUrl: "", fav: false, at: Date.now() });
+      state.renders.unshift({ id: uid(), title: set[i].title + ": " + set[i].prompt.slice(0,50) + "…", type: "Text-to-Image", project: p.name, status: "Generated · Hugging Face", at: Date.now(), brief: set[i].prompt });
+      save(); refreshChrome();
+      hfProgUpdate(100, set[i].title + " saved to All media");
+    }
+    $("imgOut").innerHTML = results.map(function(r){
+      return '<div style="border:1px solid var(--line);border-radius:10px;padding:13px 14px;margin-bottom:10px"><div style="font-weight:800;margin-bottom:7px">'+esc(r.v.title)+' · '+esc(hfShortName(modelId))+'</div><img src="'+r.img+'" alt="'+esc(r.v.title)+'" style="width:100%;border-radius:8px;display:block;margin-bottom:8px"><div style="font-size:13px;color:var(--ink2)">'+esc(r.v.prompt)+'</div><a class="btn small" style="margin-top:9px" href="'+r.img+'" download="autoflow-'+esc(r.v.title.replace(/\s+/g,"-").toLowerCase())+'.png">Download</a></div>';
+    }).join("");
+    toast(results.length + " images generated on Hugging Face — also saved in All media");
+  }catch(e){
+    toast(String(e.message) === "Cancelled" ? "Generation cancelled" : "Hugging Face image generation failed: " + String(e.message).slice(0,140));
+    if(results.length){ /* partial results stay saved in All media */ }
+    else renderImgPromptSet(set);
+  }finally{ hfProgHide(); btn.disabled = false; }
 });
 $("btnImgQueue").addEventListener("click", function(){
   var set = buildImageSet(); if(!set.length) return;
-  var p = activeProject();
-  set.forEach(function(v){
-    state.renders.unshift({ id: uid(), title: v.title + ": " + v.prompt.slice(0,50) + "…", type: "Image", project: p ? p.name : "—", status: "Needs provider", at: Date.now(), brief: v.prompt });
-    if(p) state.media.unshift({ id: uid(), projectId: p.id, type: "image", prompt: v.prompt, script: "", voice: "", voiceType: "", model: "Imagen 4", res: "—", dur: 0, ratio: $("imgRatio").value, origin: "generated", status: "Needs provider", img: "", fav: false, at: Date.now() });
-  });
-  save(); refreshChrome(); toast(set.length + " image requests recorded as “Needs provider” — see All media");
+  renderImgPromptSet(set);
+  toast("Variation prompts previewed — press “Generate images · Hugging Face” to render them for real");
 });
 
 /* ---------------- Voiceover Studio ---------------- */
@@ -2050,12 +2514,14 @@ $("btnVoLoadScene").addEventListener("click", function(){
 $("btnVoSpeak").addEventListener("click", function(){
   var t = $("voScript").value.trim();
   if(!t){ toast("The speaking script is empty — nothing to speak"); return; }
-  speakText(t, voOpts());
+  speakSmart(t, Object.assign(voOpts(), { onAudio: function(url, model){
+    $("voAudioWrap").innerHTML = '<div class="notice" style="border-color:rgba(123,196,127,.4);background:rgba(123,196,127,.06)"><strong style="color:var(--green)">Hugging Face voice ready</strong> — generated by ' + esc(model) + ' from the speaking script only.<audio controls src="' + url + '" style="width:100%;margin-top:10px"></audio><div class="rowbtns" style="margin-top:9px"><a class="btn small" href="' + url + '" download="character-voice">Download audio</a></div></div>';
+  } }));
 });
 $("btnVoSpeakAll").addEventListener("click", function(){
   var p = activeProject(); if(!p || !p.scenes.length){ toast("No scenes to speak"); return; }
   var t = p.scenes.map(function(s){ return s.voice || ""; }).filter(Boolean).join(" ");
-  if(t) speakText(t, voOpts()); else toast("No speaking lines in this project");
+  if(t) speakSmart(t, voOpts()); else toast("No speaking lines in this project");
 });
 $("btnVoPause").addEventListener("click", function(){
   if(!("speechSynthesis" in window)) return;
@@ -2208,8 +2674,7 @@ $("btnEdExport").addEventListener("click", function(){
 
 /* ---------------- YouTube Studio ---------------- */
 function ytTimestamp(sec){ var m = Math.floor(sec/60), s = Math.round(sec%60); return m + ":" + (s<10?"0":"") + s; }
-$("btnYtGenerate").addEventListener("click", function(){
-  var p = activeProject(); if(!p){ toast("Create a project first"); return; }
+function buildYtTemplatePack(p){
   var topic = p.topic || p.name;
   var title = p.kind==="Automotive" ? (p.vehicle ? (p.vehicle.year + " " + p.vehicle.model + " in " + p.vehicle.color) : p.name) + " — Full Cinematic Review & Launch Film"
                                     : p.name + " — The Complete Story";
@@ -2230,7 +2695,56 @@ $("btnYtGenerate").addEventListener("click", function(){
   $("ytThumbConcept").value = "Bold three-word headline over the hero frame, subject on the right third, high contrast, one strong colour accent, face/object large enough to read at small size.";
   $("ytThumbPrompt").value = "YouTube thumbnail, " + (hero ? hero.imgPrompt : topic) + " Oversized bold headline text space on the left, dramatic lighting, ultra sharp, high saturation, 16:9.";
   p.yt = { title: title }; touch(p); save();
-  toast("YouTube pack generated");
+}
+$("btnYtGenerate").addEventListener("click", async function(){
+  var p = activeProject(); if(!p){ toast("Create a project first"); return; }
+  if(!hfHasToken()){ buildYtTemplatePack(p); toast("YouTube pack built with the built-in writer — add a Hugging Face token in Settings for AI-written packs."); return; }
+  var btn = this; btn.disabled = true;
+  hfProgShow("Writing YouTube pack — Llama 3.3 70B");
+  hfProgUpdate(30, "Asking the Hugging Face chat model for the title, description and thumbnail concept…");
+  try{
+    var sceneList = p.scenes.map(function(s, i){ return (i+1) + ". " + s.title + " (" + (s.duration||5) + "s)"; }).join("\n");
+    var r = await hfChat(
+      "You are a YouTube SEO expert. Reply with ONLY valid JSON, no markdown, in exactly this shape: {\"title\":\"...\",\"description\":\"...\",\"hashtags\":\"...\",\"keywords\":\"...\",\"thumbConcept\":\"...\",\"thumbPrompt\":\"...\"}. The description must be long and professional, without chapter timestamps (they are added separately).",
+      "Project: " + p.name + "\nTopic: " + (p.topic || p.name) + "\nConcept: " + (p.concept || "") + "\nScenes:\n" + sceneList);
+    var parsed = hfParseJson(r.text);
+    if(!parsed || !parsed.title) throw new Error("The model reply could not be parsed");
+    buildYtTemplatePack(p); /* fills chapters + gradient thumb from real scene durations */
+    $("ytTitle").value = parsed.title;
+    $("ytDesc").value = parsed.description || $("ytDesc").value;
+    if(parsed.hashtags) $("ytTags").value = parsed.hashtags;
+    if(parsed.keywords) $("ytKeywords").value = parsed.keywords;
+    if(parsed.thumbConcept) $("ytThumbConcept").value = parsed.thumbConcept;
+    if(parsed.thumbPrompt) $("ytThumbPrompt").value = parsed.thumbPrompt;
+    p.yt = { title: parsed.title }; touch(p); save();
+    hfProgUpdate(100, "Pack written by " + hfShortName(r.model));
+    toast("YouTube pack written by " + r.model);
+  }catch(e){
+    buildYtTemplatePack(p);
+    toast("Hugging Face text AI failed (" + String(e.message).slice(0,90) + ") — fell back to the built-in writer.");
+  }finally{ hfProgHide(); btn.disabled = false; }
+});
+$("btnYtThumbGen").addEventListener("click", async function(){
+  var p = activeProject(); if(!p){ toast("Create a project first"); return; }
+  var prompt = $("ytThumbPrompt").value.trim();
+  if(!prompt){ toast("Generate the YouTube pack first, or write a thumbnail prompt"); return; }
+  if(!hfRequireToken("generate the thumbnail")) return;
+  var btn = this; btn.disabled = true;
+  try{
+    hfProgShow("Generating thumbnail — " + hfShortName(cs.imageModel));
+    hfProgUpdate(12, "Sending the thumbnail prompt to Hugging Face…");
+    var blob = await hfGenerateImage(cs.imageModel, prompt, "blurry, watermark, low contrast");
+    var dataUrl = await blobToDataURL(blob);
+    $("ytThumb").style.backgroundImage = "url(" + dataUrl + ")";
+    $("ytThumbText").textContent = p.name.toUpperCase();
+    state.media.unshift({ id: uid(), projectId: p.id, type: "image", prompt: prompt, script: "", voice: "", voiceType: "", model: cs.imageModel, res: "—", dur: 0, ratio: "16:9", origin: "generated", status: "Generated · Hugging Face", img: dataUrl, videoUrl: "", fav: false, at: Date.now() });
+    state.renders.unshift({ id: uid(), title: "YouTube thumbnail: " + p.name, type: "Text-to-Image", project: p.name, status: "Generated · Hugging Face", at: Date.now(), brief: prompt });
+    save(); refreshChrome();
+    hfProgUpdate(100, "Thumbnail saved to All media");
+    toast("Thumbnail generated on Hugging Face — saved in All media");
+  }catch(e){
+    toast(String(e.message) === "Cancelled" ? "Generation cancelled" : "Thumbnail generation failed: " + String(e.message).slice(0,140));
+  }finally{ hfProgHide(); btn.disabled = false; }
 });
 $("btnYtCopyAll").addEventListener("click", function(){
   var all = ["TITLE: " + $("ytTitle").value, "DESCRIPTION:\n" + $("ytDesc").value, "CHAPTERS:\n" + $("ytChapters").value, "HASHTAGS: " + $("ytTags").value, "KEYWORDS: " + $("ytKeywords").value, "THUMBNAIL CONCEPT: " + $("ytThumbConcept").value, "THUMBNAIL PROMPT: " + $("ytThumbPrompt").value].join("\n\n");
@@ -2281,6 +2795,7 @@ function queueTable(list){
     + '</tbody></table></div>';
 }
 function renderSettings(){
+  refreshHfUI();
   $("queueWrap").innerHTML = state.renders.length ? queueTable(state.renders) : '<div class="empty">No requests yet.</div>';
 }
 $("btnClearQueue").addEventListener("click", function(){
@@ -2316,6 +2831,7 @@ $("btnWipe").addEventListener("click", function(){
 load();
 refreshChrome();
 refreshChip();
+refreshHfUI();
 renderMedia();
 updateFilterCount();
 </script>
